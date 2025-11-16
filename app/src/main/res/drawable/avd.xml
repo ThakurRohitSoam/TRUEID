@@ -1,0 +1,27 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/logo">
+
+
+
+    <target android:name="group_2"
+        android:animation="@animator/group_2_scale_x" />
+
+    <target android:name="group_2"
+        android:animation="@animator/group_2_scale_y" />
+
+
+    <target
+        android:name="group"
+        android:animation="@animator/group_translate_x" />
+
+    <target
+        android:name="group"
+        android:animation="@animator/group_translate_y" />
+
+
+
+    <target android:name="path_3"
+        android:animation="@animator/path_3_fillcolor"
+        />
+
+</animated-vector>
