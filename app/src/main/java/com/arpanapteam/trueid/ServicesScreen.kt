@@ -1,6 +1,7 @@
 package com.arpanapteam.trueid
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.Indigo
@@ -29,7 +31,7 @@ data class ServiceData(val title: String, val description: String, val icon: Ima
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServicesScreen() {
+fun ServicesScreen(navController: NavHostController) {
     Scaffold(
         containerColor = OffWhite,
         topBar = { ServiceTopAppBar() },
@@ -61,7 +63,9 @@ fun ServicesScreen() {
 
             item {
                 ServiceCategorySection(title = "Popular Services") {
-                    ServiceItemCard(ServiceData("Aadhar Card Update", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin))
+                    ServiceItemCard(ServiceData("Aadhar Card Update", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin),onClick = {
+                        navController.navigate("income_certificate")
+                    })
                     ServiceItemCard(ServiceData("PAN Card Application", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.Work))
                     ServiceItemCard(ServiceData("Scholarship Scheme", "Find and apply for various government Scholarship programs.", Icons.Outlined.School))
                 }
@@ -137,10 +141,11 @@ fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun ServiceItemCard(service: ServiceData,navController = navController) {
+fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
     Card(
+
         // change by abhishek
-        modifier = Modifier.fillMaxWidth().clickable{navController.navigate("income_certificate")},
+        modifier = Modifier.fillMaxWidth().clickable{onClick},
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -190,6 +195,6 @@ fun ServiceItemCard(service: ServiceData,navController = navController) {
 @Composable
 fun ServicesScreenPreview() {
     TRUEIDTheme {
-        ServicesScreen()
+//        ServicesScreen(navController = navController)
     }
 }

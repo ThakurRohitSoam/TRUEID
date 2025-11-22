@@ -49,9 +49,11 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         composable("home") { TrueIdHomeScreen() }
-                        composable("services") { ServicesScreen() }
+                        composable("services") { ServicesScreen(navController) }
                         composable("news") { NewsScreen() }
                         composable("feedback") { FeedbackScreen() }
+                        composable("income_certificate") { IncomeCertificateScreen() }
+//                        composable("domicile_certificate") { DomicileCertificateScreen()
                     }
                 }
             }
