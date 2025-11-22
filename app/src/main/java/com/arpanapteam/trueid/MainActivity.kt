@@ -55,12 +55,12 @@ class MainActivity : ComponentActivity() {
                             TrueIdHomeScreen()
                         }
 
-                        // ⭐ FIX – Passing navController
+                        //  Passing navController
                         composable("services") {
                             ServicesScreen(navController)
                         }
 
-                        // ⭐ NEW ROUTE – Income Certificate
+
                         composable("income_certificate") {
                             IncomeCertificateScreen(navController)
                         }
