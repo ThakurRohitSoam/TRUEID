@@ -69,7 +69,7 @@ fun ServicesScreen() {
 
             item {
                 ServiceCategorySection(title = "Document Services") {
-                    ServiceItemCard(ServiceData("Income Certificate", "Apply for or download your income certificate.", Icons.Outlined.Description))
+                    ServiceItemCard(ServiceData("Income Certificate", "Apply for or download your income certificate.", Icons.Outlined.Description, navController)) // change
                     ServiceItemCard(ServiceData("Domicile Certificate", "Obtain a certificate of residency in Uttar Pradesh.", Icons.Outlined.Home))
                     ServiceItemCard(ServiceData("Caste Certificate", "Apply for your caste certificate for government benefits.", Icons.Outlined.VerifiedUser))
                 }
@@ -137,9 +137,9 @@ fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun ServiceItemCard(service: ServiceData,navController = navController) {
+fun ServiceItemCard(service: ServiceData,navController: navController) { //change
     Card(
-        // change by abhishek
+        // change 
         modifier = Modifier.fillMaxWidth().clickable{navController.navigate("income_certificate")},
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
