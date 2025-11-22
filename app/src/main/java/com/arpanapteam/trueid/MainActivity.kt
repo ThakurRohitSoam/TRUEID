@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
@@ -27,31 +28,50 @@ import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
-import androidx.compose.foundation.layout.WindowInsets
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             TRUEIDTheme {
+
                 val navController = rememberNavController()
+
                 Scaffold(
-                    contentWindowInsets = WindowInsets(0,0,0,0),
-                    bottomBar = { TrueIdBottomBar(navController = navController) }
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                    bottomBar = { TrueIdBottomBar(navController) }
                 ) { innerPadding ->
+
                     NavHost(
                         navController = navController,
                         startDestination = "home",
                         modifier = Modifier.padding(innerPadding)
                     ) {
 
-                        composable("home") { TrueIdHomeScreen() }
-                        composable("services") { ServicesScreen() }
-                        composable("news") { NewsScreen() }
-                        composable("feedback") { FeedbackScreen() }
+                        composable("home") {
+                            TrueIdHomeScreen()
+                        }
+
+                        // ⭐ FIX – Passing navController
+                        composable("services") {
+                            ServicesScreen(navController)
+                        }
+
+                        // ⭐ NEW ROUTE – Income Certificate
+                        composable("income_certificate") {
+                            IncomeCertificateScreen(navController)
+                        }
+
+                        composable("news") {
+                            NewsScreen()
+                        }
+
+                        composable("feedback") {
+                            FeedbackScreen()
+                        }
                     }
                 }
             }
@@ -61,12 +81,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TrueIdBottomBar(navController: NavController) {
+
     val items = listOf(
         BottomNavItem("Home", Icons.Outlined.Home, "home"),
         BottomNavItem("Services", Icons.Outlined.Apps, "services"),
         BottomNavItem("News", Icons.AutoMirrored.Outlined.Article, "news"),
         BottomNavItem("Feedback", Icons.Outlined.Feedback, "feedback")
     )
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 

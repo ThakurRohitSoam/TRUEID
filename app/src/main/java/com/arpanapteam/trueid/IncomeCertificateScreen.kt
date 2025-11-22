@@ -20,15 +20,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncomeCertificateScreen() {
+fun IncomeCertificateScreen(navController: NavHostController) {
+
     Scaffold(
-        topBar = { IncomeCertificateTopAppBar() },
+        topBar = { IncomeCertificateTopAppBar(onBackClick = { navController.popBackStack() }) },
         containerColor = OffWhite,
         bottomBar = {
             Button(
@@ -43,6 +46,7 @@ fun IncomeCertificateScreen() {
             }
         }
     ) { paddingValues ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -50,11 +54,13 @@ fun IncomeCertificateScreen() {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             item {
                 Step(1, "Register on e-Sathi Portal") {
                     Text("If you are a new user, you must first register yourself. Click here to register.")
                 }
             }
+
             item {
                 Step(2, "Prepare Your Documents") {
                     Text("Keep scanned copies of the following documents ready:")
@@ -66,6 +72,7 @@ fun IncomeCertificateScreen() {
                     Text("- Salary Slip (if applicable, under 100KB)")
                 }
             }
+
             item {
                 Step(3, "Login and Apply") {
                     Text("Follow these instructions after logging in:")
@@ -79,16 +86,19 @@ fun IncomeCertificateScreen() {
                     Text("7. Download the final Acknowledgement Slip.")
                 }
             }
+
             item {
                 Step(4, "Check Application Status") {
                     Text("You can track the status of your application using your application number. Click here to check status.")
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier.padding(top = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -97,12 +107,14 @@ fun IncomeCertificateScreen() {
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
                     ) {
+
                         Image(
                             painter = painterResource(id = R.drawable.income_certificate_tutorial),
                             contentDescription = "Income Certificate Tutorial",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
+
                         Icon(
                             imageVector = Icons.Default.PlayCircle,
                             contentDescription = "Play Video",
@@ -110,13 +122,17 @@ fun IncomeCertificateScreen() {
                             tint = Color.White.copy(alpha = 0.8f)
                         )
                     }
+
                     Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         text = "How to Apply for Income Certificate",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Button(
                         onClick = { /* TODO */ },
                         shape = RoundedCornerShape(12.dp),
@@ -132,11 +148,12 @@ fun IncomeCertificateScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncomeCertificateTopAppBar() {
+fun IncomeCertificateTopAppBar(onBackClick: () -> Unit) {
+
     TopAppBar(
         title = { Text("Income Certificate") },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = onBackClick) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
         }
@@ -166,7 +183,8 @@ fun Step(stepNumber: Int, title: String, content: @Composable () -> Unit) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun IncomeCertificateScreenPreview() {
+    val navController = rememberNavController()
     TRUEIDTheme {
-        IncomeCertificateScreen()
+        IncomeCertificateScreen(navController)
     }
 }
