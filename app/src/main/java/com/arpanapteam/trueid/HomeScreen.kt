@@ -12,7 +12,6 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -24,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.*
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun TrueIdHomeScreen() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -39,6 +40,7 @@ fun TrueIdHomeScreen() {
     ) {
         Scaffold(
             containerColor = OffWhite,
+//            contentWindowInsets = WindowInsets(0,0,0,0),
             topBar = {
                 TrueIdTopAppBar(onMenuClick = {
                     scope.launch {
@@ -51,6 +53,7 @@ fun TrueIdHomeScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
+
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
@@ -221,6 +224,7 @@ fun ServiceItemRow(item: ServiceItem) {
 @Composable
 fun TrueIdHomeScreenPreview() {
     TRUEIDTheme { // Use your actual theme
-        TrueIdHomeScreen()
+       TrueIdHomeScreen()
+//
     }
 }

@@ -27,6 +27,8 @@ import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import androidx.compose.foundation.layout.WindowInsets
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
             TRUEIDTheme {
                 val navController = rememberNavController()
                 Scaffold(
+                    contentWindowInsets = WindowInsets(0,0,0,0),
                     bottomBar = { TrueIdBottomBar(navController = navController) }
                 ) { innerPadding ->
                     NavHost(

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Square container so your circle never becomes a rectangle -->
+    <FrameLayout
+        android:id="@+id/logoContainer"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/splashLogo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/tick_fill_logo"
+            android:scaleType="centerInside"
+            android:adjustViewBounds="true" />
+
+    </FrameLayout>
+
+</FrameLayout>
