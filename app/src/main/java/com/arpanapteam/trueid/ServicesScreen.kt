@@ -137,9 +137,10 @@ fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun ServiceItemCard(service: ServiceData) {
+fun ServiceItemCard(service: ServiceData,navController = navController) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        // change by abhishek
+        modifier = Modifier.fillMaxWidth().clickable{navController.navigate("income_certificate")},
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
