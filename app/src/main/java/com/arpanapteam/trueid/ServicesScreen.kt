@@ -4,10 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -22,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.Indigo
@@ -34,7 +38,7 @@ data class ServiceData(val title: String, val description: String, val icon: Ima
 fun ServicesScreen(navController: NavHostController) {
     Scaffold(
         containerColor = OffWhite,
-        topBar = { ServiceTopAppBar() },
+        topBar = { ServiceTopAppBar(navController) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -62,29 +66,120 @@ fun ServicesScreen(navController: NavHostController) {
             }
 
             item {
-                ServiceCategorySection(title = "Popular Services") {
+                ServiceCategorySection(title = "Important Documents") {
                     ServiceItemCard(ServiceData("Aadhar Card Update", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin),onClick = {
+                        navController.navigate("aadhar")
+                    })
+
+                    ServiceItemCard(ServiceData("PAN Card Application", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.Work))
+
+                    ServiceItemCard(ServiceData("Driving License", "Apply for a new or renew your driving license.", Icons.Outlined.CarRental))
+
+                    ServiceItemCard(ServiceData("Indian Passport", "Apply for a new Passport", Icons.Outlined.CarRental))
+
+                    ServiceItemCard(ServiceData("Voter Id", "Apply for a new Voter Id ", Icons.Outlined.CarRental))
+
+                }
+            }
+
+            item {
+                ServiceCategorySection(title = "E-District Services") {
+                    ServiceItemCard(ServiceData("Income Certificate", "Apply for new income certificate.", Icons.Outlined.Description),onClick = {
                         navController.navigate("income_certificate")
                     })
-                    ServiceItemCard(ServiceData("PAN Card Application", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.Work))
-                    ServiceItemCard(ServiceData("Scholarship Scheme", "Find and apply for various government Scholarship programs.", Icons.Outlined.School))
-                }
-            }
 
-            item {
-                ServiceCategorySection(title = "Document Services") {
-                    ServiceItemCard(ServiceData("Income Certificate", "Apply for or download your income certificate.", Icons.Outlined.Description))
                     ServiceItemCard(ServiceData("Domicile Certificate", "Obtain a certificate of residency in Uttar Pradesh.", Icons.Outlined.Home))
+
                     ServiceItemCard(ServiceData("Caste Certificate", "Apply for your caste certificate for government benefits.", Icons.Outlined.VerifiedUser))
+
+                    ServiceItemCard(ServiceData("Ration Card", "Apply for New Ration Card", Icons.Outlined.VerifiedUser))
+
+                    ServiceItemCard(ServiceData("Family Id", "Get your Family Id by simple steps.", Icons.Outlined.VerifiedUser))
+
                 }
             }
 
             item {
-                ServiceCategorySection(title = "Utility Services") {
-                    ServiceItemCard(ServiceData("Driving License", "Apply for a new or renew your driving license.", Icons.Outlined.CarRental))
-                    ServiceItemCard(ServiceData("Property Registration", "Register property deeds and obtain land records.", Icons.Outlined.HomeWork))
-                    ServiceItemCard(ServiceData("University Admissions", "Information and application for state university admissions.", Icons.Outlined.Assignment))
+                ServiceCategorySection(title = "Government Schemes") {
+
+                    ServiceItemCard(ServiceData("PM-Kisaan Samman Nidhi Yojna", "Get a benefit of 6000 rupees annually Under Pm Kisaan Samman Nidhi ", Icons.Outlined.HomeWork))
+
+                    ServiceItemCard(ServiceData("Pradhan Mantri Kaushal Vikash Yojna", "Information and application for state university admissions.",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+                    ServiceItemCard(ServiceData("UP Pension Schemes", "Information and application for state university admissions.",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
                 }
+
+            }
+
+            item {
+                ServiceCategorySection(title = "Scholarship") {
+                    ServiceItemCard(ServiceData("UP Scholarship", "Apply for Scholarship program in Uttar Pradesh.", Icons.Outlined.School))
+                    ServiceItemCard(ServiceData("National Scholarship", "Apply for National Scholarship by Central Government", Icons.Outlined.HomeWork))
+                    ServiceItemCard(ServiceData("Saksham Scholarship", "Apply for Saksham Scholarship program ",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+                }
+
+            }
+
+            item {
+                ServiceCategorySection(title = "Education Board & Universities") {
+
+                    ServiceItemCard(ServiceData("UP Board", "Check your Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+
+                    ServiceItemCard(ServiceData("CBSE Board", "Check your Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+                    ServiceItemCard(ServiceData("UP Board of Technical Education", "Check your Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+
+                    ServiceItemCard(ServiceData("ICSE Board", "Check your Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+                    ServiceItemCard(ServiceData("AKTU", "Check your Student Profile Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.LibraryBooks
+                    ))
+                    ServiceItemCard(ServiceData("CCSU", "Check your Results and Course Curriculum",
+                        Icons.AutoMirrored.Outlined.MenuBook
+                    ))
+                }
+
+            }
+
+
+            item {
+                ServiceCategorySection(title = "Property and Land Records") {
+
+                    ServiceItemCard(ServiceData("UP Bhulekh", "View your Khasra Khatauni online ", Icons.Outlined.DocumentScanner))
+
+                    ServiceItemCard(ServiceData("Property Registration", "Register property deeds and obtain land records.", Icons.Outlined.PendingActions))
+
+                    ServiceItemCard(ServiceData("Property Maps", "View property maps and obtain land records",
+                        Icons.AutoMirrored.Outlined.Assignment
+                    ))
+                }
+
+            }
+
+            item {
+                ServiceCategorySection(title = "Travel & Ticket Bookings") {
+                    ServiceItemCard(ServiceData("Indian Railway", "Book Indian Railway Tickets", Icons.Outlined.Train))
+
+                    ServiceItemCard(ServiceData("Flight Booking", "Book Flight Tickets", Icons.Outlined.Flight))
+
+                    ServiceItemCard(ServiceData("Metro Services", "Book Metro Tickets  ", Icons.Outlined.DirectionsRailwayFilled))
+
+
+                    ServiceItemCard(ServiceData("Bus Booking", "Book Bus Tickets  ", Icons.Outlined.DirectionsBus))
+
+                }
+
             }
         }
     }
@@ -92,7 +187,7 @@ fun ServicesScreen(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceTopAppBar() {
+fun ServiceTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = {
             Text(
@@ -102,8 +197,10 @@ fun ServiceTopAppBar() {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /* Handle back click */ }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -145,7 +242,7 @@ fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
     Card(
 
         // change by abhishek
-        modifier = Modifier.fillMaxWidth().clickable{onClick},
+        modifier = Modifier.fillMaxWidth().clickable{onClick()},
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -183,7 +280,7 @@ fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
                 )
             }
             Icon(
-                imageVector = Icons.Outlined.ArrowForward,
+                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                 contentDescription = "Go",
                 tint = Color.Gray
             )
@@ -195,6 +292,6 @@ fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
 @Composable
 fun ServicesScreenPreview() {
     TRUEIDTheme {
-//        ServicesScreen(navController = navController)
+        ServicesScreen(rememberNavController())
     }
 }
