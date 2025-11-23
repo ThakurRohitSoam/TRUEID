@@ -12,13 +12,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 data class Service(val name: String, val description: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen() {
+fun AboutScreen(navController: NavController) {
     val services = listOf(
         Service("Aadhar Card", "A 12-digit unique identity number for Indian citizens, storing biometric and demographic data."),
         Service("PAN Card", "A 10-digit alphanumeric number assigned to all taxpayers in India for tracking financial transactions."),
@@ -32,7 +34,7 @@ fun AboutScreen() {
     )
 
     Scaffold(
-        topBar = { AboutTopAppBar() }
+        topBar = { AboutTopAppBar(navController) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -90,11 +92,11 @@ fun AboutScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutTopAppBar() {
+fun AboutTopAppBar(navController: NavController) {
     TopAppBar(
         title = { Text("About") },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
         }
@@ -104,7 +106,8 @@ fun AboutTopAppBar() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AboutScreenPreview() {
+    val navController = rememberNavController()
     TRUEIDTheme {
-        AboutScreen()
+        AboutScreen(navController)
     }
 }

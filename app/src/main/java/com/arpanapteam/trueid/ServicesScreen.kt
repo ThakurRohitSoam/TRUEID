@@ -46,7 +46,6 @@ fun ServicesScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
-            // SEARCH BOX
             item {
                 var searchQuery by remember { mutableStateOf("") }
 
@@ -66,23 +65,25 @@ fun ServicesScreen(navController: NavController) {
                 )
             }
 
-            // POPULAR SERVICES
             item {
                 ServiceCategorySection(title = "Popular Services") {
-                    ServiceItemCard(service =
-                        ServiceData("Aadhar Card Update",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "Aadhar Card Update",
                             "Update demographic or biometric details in your Aadhar card.",
                             Icons.Outlined.PersonPin
                         )
                     )
-                    ServiceItemCard(service =
-                        ServiceData("PAN Card Application",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "PAN Card Application",
                             "Apply for a new Permanent Account Number (PAN) card.",
                             Icons.Outlined.Work
                         )
                     )
-                    ServiceItemCard(service =
-                        ServiceData("Scholarship Scheme",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "Scholarship Scheme",
                             "Find and apply for various government Scholarship programs.",
                             Icons.Outlined.School
                         )
@@ -90,11 +91,9 @@ fun ServicesScreen(navController: NavController) {
                 }
             }
 
-            // DOCUMENT SERVICES
             item {
                 ServiceCategorySection(title = "Document Services") {
 
-                    // 👉 INCOME CERTIFICATE — NAVIGATES TO NEXT SCREEN
                     ServiceItemCard(
                         service = ServiceData(
                             "Income Certificate",
@@ -122,23 +121,25 @@ fun ServicesScreen(navController: NavController) {
                 }
             }
 
-            // UTILITY SERVICES
             item {
                 ServiceCategorySection(title = "Utility Services") {
-                    ServiceItemCard(service =
-                        ServiceData("Driving License",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "Driving License",
                             "Apply for a new or renew your driving license.",
                             Icons.Outlined.CarRental
                         )
                     )
-                    ServiceItemCard(service =
-                        ServiceData("Property Registration",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "Property Registration",
                             "Register property deeds and obtain land records.",
                             Icons.Outlined.HomeWork
                         )
                     )
-                    ServiceItemCard(service =
-                        ServiceData("University Admissions",
+                    ServiceItemCard(
+                        service = ServiceData(
+                            "University Admissions",
                             "Information and application for state university admissions.",
                             Icons.Outlined.Assignment
                         )
@@ -161,7 +162,7 @@ fun ServiceTopAppBar() {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /* Back logic optional */ }) {
+            IconButton(onClick = { /* optional back / drawer */ }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
             }
         },
@@ -201,7 +202,6 @@ fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
 
 @Composable
 fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -210,12 +210,10 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -230,9 +228,7 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
                     modifier = Modifier.size(24.dp)
                 )
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = service.title,
@@ -246,7 +242,6 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
                     color = TextGray
                 )
             }
-
             Icon(
                 imageVector = Icons.Outlined.ArrowForward,
                 contentDescription = "Go",

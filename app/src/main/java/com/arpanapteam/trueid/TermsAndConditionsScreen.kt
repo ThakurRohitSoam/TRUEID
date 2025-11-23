@@ -1,11 +1,6 @@
 package com.arpanapteam.trueid
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,15 +11,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
-import androidx.compose.foundation.layout.*
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TermsAndConditionsScreen() {
+fun TermsAndConditionsScreen(navController: NavController) {
     Scaffold(
-        topBar = { TermsAndConditionsTopAppBar() }
+        topBar = { TermsAndConditionsTopAppBar(navController) }
     ) {
         LazyColumn(
             modifier = Modifier
@@ -69,11 +64,11 @@ fun TermsAndConditionsScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TermsAndConditionsTopAppBar() {
+fun TermsAndConditionsTopAppBar(navController: NavController) {
     TopAppBar(
         title = { Text("Terms and Conditions") },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
         }
@@ -92,7 +87,8 @@ fun Term(number: Int, title: String, content: @Composable () -> Unit) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun TermsAndConditionsScreenPreview() {
+    val navController = rememberNavController()
     TRUEIDTheme {
-        TermsAndConditionsScreen()
+        TermsAndConditionsScreen(navController)
     }
 }

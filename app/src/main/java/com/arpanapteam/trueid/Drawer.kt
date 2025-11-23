@@ -1,12 +1,18 @@
 package com.arpanapteam.trueid
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Chat
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +24,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.Indigo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDrawer(onClose: () -> Unit) {
+fun AppDrawer(
+    navController: NavController,
+    onClose: () -> Unit
+) {
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),
         drawerContainerColor = Color.White
@@ -64,11 +75,43 @@ fun AppDrawer(onClose: () -> Unit) {
             Spacer(Modifier.height(32.dp))
 
             // Menu Items
-            DrawerMenuItem(icon = Icons.Outlined.Info, text = "About Us")
-            DrawerMenuItem(icon = Icons.AutoMirrored.Outlined.Article, text = "Terms & Conditions", hasNotification = true)
+            DrawerMenuItem(
+                icon = Icons.Outlined.Info,
+                text = "About Us",
+                onClick = {
+                    navController.navigate("about")
+                    onClose()
+                }
+            )
+
+            DrawerMenuItem(
+                icon = Icons.AutoMirrored.Outlined.Article,
+                text = "Terms & Conditions",
+                onClick = {
+                    navController.navigate("terms")
+                    onClose()
+                }
+            )
+
             ThemeMenuItem()
-            DrawerMenuItem(icon = Icons.Outlined.Feedback, text = "Feedback")
-            DrawerMenuItem(icon = Icons.Outlined.Chat, text = "Contact Us")
+
+            DrawerMenuItem(
+                icon = Icons.Outlined.Feedback,
+                text = "Feedback",
+                onClick = {
+                    navController.navigate("feedback")
+                    onClose()
+                }
+            )
+            DrawerMenuItem(
+                icon = Icons.Outlined.Chat,
+                text = "Contact Us",
+                onClick = {
+                    navController.navigate("contact")
+                    onClose()
+                }
+            )
+
 
             Spacer(Modifier.weight(1f))
 
@@ -97,10 +140,16 @@ fun AppDrawer(onClose: () -> Unit) {
 }
 
 @Composable
-fun DrawerMenuItem(icon: ImageVector, text: String, hasNotification: Boolean = false) {
+fun DrawerMenuItem(
+    icon: ImageVector,
+    text: String,
+    hasNotification: Boolean = false,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -109,7 +158,7 @@ fun DrawerMenuItem(icon: ImageVector, text: String, hasNotification: Boolean = f
         Text(text, fontSize = 16.sp, color = Color.Black)
         if (hasNotification) {
             Spacer(Modifier.weight(1f))
-
+            // yaha future me badge wagaira daal sakte ho
         }
     }
 }
@@ -133,8 +182,10 @@ fun ThemeMenuItem() {
         )
     }
 }
+
 @Preview
 @Composable
 fun AppDrawerPreview() {
-    AppDrawer(onClose = {})
+    val navController = rememberNavController()
+    AppDrawer(navController = navController, onClose = {})
 }

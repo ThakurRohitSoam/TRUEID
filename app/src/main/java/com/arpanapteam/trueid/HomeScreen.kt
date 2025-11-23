@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -22,72 +21,61 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.*
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
-fun TrueIdHomeScreen() {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+fun TrueIdHomeScreen(openDrawer: () -> Unit) {
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            AppDrawer(onClose = { scope.launch { drawerState.close() } })
+    Scaffold(
+        containerColor = OffWhite,
+        topBar = {
+            TrueIdTopAppBar(
+                onMenuClick = openDrawer
+            )
         }
-    ) {
-        Scaffold(
-            containerColor = OffWhite,
-//            contentWindowInsets = WindowInsets(0,0,0,0),
-            topBar = {
-                TrueIdTopAppBar(onMenuClick = {
-                    scope.launch {
-                        drawerState.open()
-                    }
-                })
-            }
-        ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+    ) { paddingValues ->
 
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                item { HeroCard() }
-                item {
-                    ServiceCategoryCard(
-                        title = "Important Documents",
-                        items = listOf(
-                            ServiceItem("Aadhar Card", Icons.Outlined.QrCodeScanner),
-                            ServiceItem("PAN Card", Icons.Outlined.CreditCard),
-                            ServiceItem("Indian Passport", Icons.Outlined.Book)
-                        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            item { HeroCard() }
+
+            item {
+                ServiceCategoryCard(
+                    title = "Important Documents",
+                    items = listOf(
+                        ServiceItem("Aadhar Card", Icons.Outlined.QrCodeScanner),
+                        ServiceItem("PAN Card", Icons.Outlined.CreditCard),
+                        ServiceItem("Indian Passport", Icons.Outlined.Book)
                     )
-                }
-                item {
-                    ServiceCategoryCard(
-                        title = "Uttar Pradesh E-District Services",
-                        items = listOf(
-                            ServiceItem("Income Certificate", Icons.AutoMirrored.Outlined.ReceiptLong),
-                            ServiceItem("Domicile Certificate", Icons.Outlined.HomeWork),
-                            ServiceItem("Caste Certificate", Icons.Outlined.Groups)
-                        )
+                )
+            }
+
+            item {
+                ServiceCategoryCard(
+                    title = "Uttar Pradesh E-District Services",
+                    items = listOf(
+                        ServiceItem("Income Certificate", Icons.AutoMirrored.Outlined.ReceiptLong),
+                        ServiceItem("Domicile Certificate", Icons.Outlined.HomeWork),
+                        ServiceItem("Caste Certificate", Icons.Outlined.Groups)
                     )
-                }
-                item {
-                    ServiceCategoryCard(
-                        title = "Ticket Booking",
-                        items = listOf(
-                            ServiceItem("Indian Railway", Icons.Outlined.Train),
-                            ServiceItem("Flight Booking", Icons.Outlined.Flight),
-                            ServiceItem("Metro Services", Icons.Outlined.Tram)
-                        )
+                )
+            }
+
+            item {
+                ServiceCategoryCard(
+                    title = "Ticket Booking",
+                    items = listOf(
+                        ServiceItem("Indian Railway", Icons.Outlined.Train),
+                        ServiceItem("Flight Booking", Icons.Outlined.Flight),
+                        ServiceItem("Metro Services", Icons.Outlined.Tram)
                     )
-                }
+                )
             }
         }
     }
@@ -118,11 +106,10 @@ fun TrueIdTopAppBar(onMenuClick: () -> Unit) {
             }
         },
         actions = {
-            IconButton(onClick = { /* Handle search click */ }) {
+            IconButton(onClick = {}) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
             }
         },
-
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White
         )
@@ -177,7 +164,8 @@ fun ServiceCategoryCard(title: String, items: List<ServiceItem>) {
                     .fillMaxWidth()
                     .background(
                         color = Indigo,
-                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                        shape = RoundedCornerShape(topStart =
+                            16.dp, topEnd = 16.dp)
                     )
                     .padding(16.dp)
             ) {
@@ -223,8 +211,7 @@ fun ServiceItemRow(item: ServiceItem) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun TrueIdHomeScreenPreview() {
-    TRUEIDTheme { // Use your actual theme
-       TrueIdHomeScreen()
-//
+    TRUEIDTheme {
+        TrueIdHomeScreen(openDrawer = {})
     }
 }

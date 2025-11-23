@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,9 +26,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,38 +42,69 @@ class MainActivity : ComponentActivity() {
             TRUEIDTheme {
 
                 val navController = rememberNavController()
+                val drawerState = rememberDrawerState(DrawerValue.Closed)
+                val scope = rememberCoroutineScope()
 
-                Scaffold(
-                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                    bottomBar = { TrueIdBottomBar(navController) }
-                ) { innerPadding ->
+                val openDrawer: () -> Unit = {
+                    scope.launch { drawerState.open() }
+                }
 
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home",
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        AppDrawer(
+                            navController = navController,
+                            onClose = { scope.launch { drawerState.close() } }
+                        )
+                    }
+                ) {
 
-                        composable("home") {
-                            TrueIdHomeScreen()
-                        }
+                    Scaffold(
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        bottomBar = { TrueIdBottomBar(navController) }
+                    ) { innerPadding ->
 
-                        //  Passing navController
-                        composable("services") {
-                            ServicesScreen(navController)
-                        }
+                        NavHost(
+                            navController = navController,
+                            startDestination = "home",
+                            modifier = Modifier.padding(innerPadding)
+                        ) {
+
+                            composable("home") {
+                                TrueIdHomeScreen(openDrawer = openDrawer)
+                            }
+
+                            composable("services") {
+                                ServicesScreen(navController)
+                            }
+
+                            composable("income_certificate") {
+                                IncomeCertificateScreen(navController)
+                            }
+
+                            composable("about") {
+                                AboutScreen(navController)
+                            }
+
+                            composable("terms") {
+                                TermsAndConditionsScreen(navController)
+                            }
+
+                            composable("news") {
+                                NewsScreen()
+                            }
+                            composable("contact") { ContactUsScreen { navController.popBackStack() } }
 
 
-                        composable("income_certificate") {
-                            IncomeCertificateScreen(navController)
-                        }
-
-                        composable("news") {
-                            NewsScreen()
-                        }
-
-                        composable("feedback") {
-                            FeedbackScreen()
+                            // Correct Feedback Screen Navigation
+                            composable("feedback") {
+                                MultiStepFeedbackScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onSubmit = {
+                                        navController.popBackStack()    // Go back after submitting
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -92,18 +126,14 @@ fun TrueIdBottomBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NavigationBar(
-        containerColor = Color.White,
-        contentColor = Indigo
-    ) {
+    NavigationBar(containerColor = Color.White) {
+
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
