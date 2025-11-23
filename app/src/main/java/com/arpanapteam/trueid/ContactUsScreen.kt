@@ -50,8 +50,7 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
                 .verticalScroll(scrollState)
                 .background(Color(0xFFE0F2E9))
                 .padding(20.dp)
-        )
-        {
+        ) {
 
             Text(
                 "Contact Us",
@@ -74,7 +73,6 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // FIXED → weight() moved to the function call
                 ContactTopCard(
                     iconRes = R.drawable.contact,
                     title = "Call us",
@@ -135,8 +133,6 @@ fun ContactTopCard(
     subtitle: String,
     modifier: Modifier = Modifier
 ) {
-
-    // FIXED → no weight here
     Column(
         modifier = modifier
             .background(Color.White, RoundedCornerShape(20.dp))

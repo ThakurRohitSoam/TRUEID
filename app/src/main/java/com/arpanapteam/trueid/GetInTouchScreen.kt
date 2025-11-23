@@ -105,7 +105,8 @@ fun ContactCard(icon: ImageVector, title: String, subtitle: String) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GetInTouchScreenPreview() {
-    TRUEIDTheme {
+    TRUEIDTheme(darkTheme = false) {     //
         GetInTouchScreen()
     }
 }
+

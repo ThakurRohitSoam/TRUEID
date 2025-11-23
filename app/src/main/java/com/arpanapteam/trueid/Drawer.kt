@@ -14,7 +14,7 @@ import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +32,9 @@ import com.arpanapteam.trueid.ui.theme.Indigo
 @Composable
 fun AppDrawer(
     navController: NavController,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    isDarkTheme: Boolean,                 // <- current theme
+    onToggleTheme: (Boolean) -> Unit      // <- change theme callback
 ) {
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),
@@ -43,12 +45,14 @@ fun AppDrawer(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Header
+
+            // ---------------- HEADER ----------------
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Outlined.VerifiedUser,
@@ -61,6 +65,7 @@ fun AppDrawer(
                             .padding(8.dp)
                     )
                     Spacer(Modifier.width(12.dp))
+
                     Text(
                         text = "TRUEID",
                         fontWeight = FontWeight.Bold,
@@ -68,13 +73,15 @@ fun AppDrawer(
                         color = Color.Black
                     )
                 }
+
                 IconButton(onClick = onClose) {
                     Icon(Icons.Outlined.Close, contentDescription = "Close Drawer")
                 }
             }
+
             Spacer(Modifier.height(32.dp))
 
-            // Menu Items
+            // ---------------- MENU ITEMS ----------------
             DrawerMenuItem(
                 icon = Icons.Outlined.Info,
                 text = "About Us",
@@ -93,7 +100,11 @@ fun AppDrawer(
                 }
             )
 
-            ThemeMenuItem()
+            // ⭐ Theme switch (REAL STATE)
+            ThemeMenuItem(
+                isDarkTheme = isDarkTheme,
+                onToggleTheme = onToggleTheme
+            )
 
             DrawerMenuItem(
                 icon = Icons.Outlined.Feedback,
@@ -103,6 +114,7 @@ fun AppDrawer(
                     onClose()
                 }
             )
+
             DrawerMenuItem(
                 icon = Icons.Outlined.Chat,
                 text = "Contact Us",
@@ -112,13 +124,13 @@ fun AppDrawer(
                 }
             )
 
-
             Spacer(Modifier.weight(1f))
 
-            // Footer
+            // ---------------- FOOTER ----------------
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Icon(
                     imageVector = Icons.Outlined.VerifiedUser,
                     contentDescription = "App Logo",
@@ -129,7 +141,9 @@ fun AppDrawer(
                         .background(Indigo)
                         .padding(10.dp)
                 )
+
                 Spacer(Modifier.width(12.dp))
+
                 Column {
                     Text("TRUEID", fontWeight = FontWeight.Bold, color = Color.Black)
                     Text("trueid@gmail.com", fontSize = 12.sp, color = Color.Gray)
@@ -139,6 +153,7 @@ fun AppDrawer(
     }
 }
 
+// ---------------- MENU ITEM ----------------
 @Composable
 fun DrawerMenuItem(
     icon: ImageVector,
@@ -155,30 +170,37 @@ fun DrawerMenuItem(
     ) {
         Icon(imageVector = icon, contentDescription = text, tint = Color.Gray)
         Spacer(Modifier.width(16.dp))
+
         Text(text, fontSize = 16.sp, color = Color.Black)
+
         if (hasNotification) {
             Spacer(Modifier.weight(1f))
-            // yaha future me badge wagaira daal sakte ho
         }
     }
 }
 
+// ---------------- THEME TOGGLE ----------------
 @Composable
-fun ThemeMenuItem() {
-    var isDarkTheme by remember { mutableStateOf(false) }
+fun ThemeMenuItem(
+    isDarkTheme: Boolean,
+    onToggleTheme: (Boolean) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         Icon(imageVector = Icons.Outlined.DarkMode, contentDescription = "Theme", tint = Color.Gray)
         Spacer(Modifier.width(16.dp))
+
         Text("Theme", fontSize = 16.sp, color = Color.Black)
         Spacer(Modifier.weight(1f))
+
         Switch(
             checked = isDarkTheme,
-            onCheckedChange = { isDarkTheme = it }
+            onCheckedChange = { checked -> onToggleTheme(checked) }
         )
     }
 }
@@ -187,5 +209,10 @@ fun ThemeMenuItem() {
 @Composable
 fun AppDrawerPreview() {
     val navController = rememberNavController()
-    AppDrawer(navController = navController, onClose = {})
+    AppDrawer(
+        navController = navController,
+        onClose = {},
+        isDarkTheme = false,
+        onToggleTheme = {}
+    )
 }

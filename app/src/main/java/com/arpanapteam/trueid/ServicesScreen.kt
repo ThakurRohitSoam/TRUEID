@@ -255,7 +255,8 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
 @Composable
 fun ServicesScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme {
+    TRUEIDTheme(darkTheme = false) {   // 👈 REQUIRED
         ServicesScreen(navController)
     }
 }
+

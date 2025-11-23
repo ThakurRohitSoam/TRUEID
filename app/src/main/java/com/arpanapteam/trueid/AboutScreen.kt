@@ -102,12 +102,12 @@ fun AboutTopAppBar(navController: NavController) {
         }
     )
 }
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AboutScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme {
+    TRUEIDTheme(darkTheme = false) {
         AboutScreen(navController)
     }
 }
+

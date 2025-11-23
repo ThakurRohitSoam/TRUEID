@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -12,20 +14,15 @@ import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
@@ -36,77 +33,111 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Edge to edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
 
         setContent {
-            TRUEIDTheme {
 
-                val navController = rememberNavController()
-                val drawerState = rememberDrawerState(DrawerValue.Closed)
-                val scope = rememberCoroutineScope()
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
 
-                val openDrawer: () -> Unit = {
-                    scope.launch { drawerState.open() }
-                }
+            // 🔥 Read theme from DataStore
+            val themeFlow = remember { ThemePreference.themeFlow(context) }
+            val isDarkTheme by themeFlow.collectAsState(initial = false)
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        AppDrawer(
-                            navController = navController,
-                            onClose = { scope.launch { drawerState.close() } }
-                        )
-                    }
-                ) {
+            // Status bar icon color according to theme
+            SideEffect {
+                WindowCompat.getInsetsController(window, window.decorView)
+                    .isAppearanceLightStatusBars = !isDarkTheme
+            }
 
-                    Scaffold(
-                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                        bottomBar = { TrueIdBottomBar(navController) }
-                    ) { innerPadding ->
-
-                        NavHost(
-                            navController = navController,
-                            startDestination = "home",
-                            modifier = Modifier.padding(innerPadding)
-                        ) {
-
-                            composable("home") {
-                                TrueIdHomeScreen(openDrawer = openDrawer)
-                            }
-
-                            composable("services") {
-                                ServicesScreen(navController)
-                            }
-
-                            composable("income_certificate") {
-                                IncomeCertificateScreen(navController)
-                            }
-
-                            composable("about") {
-                                AboutScreen(navController)
-                            }
-
-                            composable("terms") {
-                                TermsAndConditionsScreen(navController)
-                            }
-
-                            composable("news") {
-                                NewsScreen()
-                            }
-                            composable("contact") { ContactUsScreen { navController.popBackStack() } }
-
-
-                            // Correct Feedback Screen Navigation
-                            composable("feedback") {
-                                MultiStepFeedbackScreen(
-                                    onBack = { navController.popBackStack() },
-                                    onSubmit = {
-                                        navController.popBackStack()    // Go back after submitting
-                                    }
-                                )
-                            }
+            TRUEIDTheme(darkTheme = isDarkTheme) {
+                MainAppUI(
+                    isDarkTheme = isDarkTheme,
+                    onToggleTheme = { newValue ->
+                        scope.launch {
+                            ThemePreference.saveTheme(context, newValue)
                         }
                     }
+                )
+            }
+        }
+    }
+}
+
+// ⭐ Isolated UI function
+@Composable
+fun MainAppUI(
+    isDarkTheme: Boolean,
+    onToggleTheme: (Boolean) -> Unit
+) {
+
+    val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    val openDrawer: () -> Unit = {
+        scope.launch { drawerState.open() }
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            AppDrawer(
+                navController = navController,
+                onClose = { scope.launch { drawerState.close() } },
+                isDarkTheme = isDarkTheme,
+                onToggleTheme = onToggleTheme
+            )
+        }
+    ) {
+
+        Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = { TrueIdBottomBar(navController) }
+        ) { innerPadding ->
+
+            NavHost(
+                navController = navController,
+                startDestination = "home",
+                modifier = Modifier.padding(innerPadding)
+            ) {
+
+                composable("home") {
+                    TrueIdHomeScreen(openDrawer = openDrawer)
+                }
+
+                composable("services") {
+                    ServicesScreen(navController)
+                }
+
+                composable("income_certificate") {
+                    IncomeCertificateScreen(navController)
+                }
+
+                composable("about") {
+                    AboutScreen(navController)
+                }
+
+                composable("terms") {
+                    TermsAndConditionsScreen(navController)
+                }
+
+                composable("news") {
+                    NewsScreen()
+                }
+
+                composable("contact") {
+                    ContactUsScreen { navController.popBackStack() }
+                }
+
+                composable("feedback") {
+                    MultiStepFeedbackScreen(
+                        onBack = { navController.popBackStack() },
+                        onSubmit = { navController.popBackStack() }
+                    )
                 }
             }
         }

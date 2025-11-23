@@ -149,12 +149,13 @@ fun IncomeCertificateTopAppBar(onBackClick: () -> Unit) {
         }
     )
 }
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun IncomeCertificateScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme {
+
+    TRUEIDTheme(darkTheme = false) {   //  REQUIRED
         IncomeCertificateScreen(navController)
     }
 }
+

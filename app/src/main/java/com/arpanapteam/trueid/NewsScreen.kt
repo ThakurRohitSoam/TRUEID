@@ -185,7 +185,7 @@ fun NewsCard(article: NewsArticle) {
 @Preview(showBackground = true)
 @Composable
 fun NewsScreenPreview() {
-    TRUEIDTheme {
+    TRUEIDTheme(darkTheme = false) {   // REQUIRED
         NewsScreen()
     }
 }

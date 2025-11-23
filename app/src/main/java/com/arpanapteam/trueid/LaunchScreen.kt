@@ -57,7 +57,8 @@ fun LaunchScreen() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LaunchScreenPreview() {
-    TRUEIDTheme {
+
+    TRUEIDTheme(darkTheme = false) {   // REQUIRED
         LaunchScreen()
     }
 }
