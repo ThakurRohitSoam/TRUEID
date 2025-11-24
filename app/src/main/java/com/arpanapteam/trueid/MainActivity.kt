@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ⭐ Isolated UI function
+// Isolated UI function
 @Composable
 fun MainAppUI(
     isDarkTheme: Boolean,

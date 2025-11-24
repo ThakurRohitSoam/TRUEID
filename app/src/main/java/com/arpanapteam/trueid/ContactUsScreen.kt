@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -102,23 +103,25 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
             SocialItem(
                 icon = R.drawable.instagram,
                 title = "Instagram",
-                subtitle = "4.6K Followers • 118 Posts"
+                subtitle = "0 Followers • 0 Posts",
+                url = "https://www.instagram.com/egovsahayta?igsh=dDViMDMybTN4Y3B0"
             )
 
             SocialItem(
-                icon = R.drawable.teligram,
+                icon = R.drawable.telegram,
                 title = "Telegram",
-                subtitle = "1.3K Followers • 85 Posts"
+                subtitle = "0 Followers • 0 Posts",
+                url = "https://t.me/+XmlbmJdZ_ZJkZTU1"
             )
 
             SocialItem(
                 icon = R.drawable.facebook,
                 title = "Facebook",
-                subtitle = "3.8K Followers • 136 Posts"
+                subtitle = "0 Followers • 0 Posts"
             )
 
             SocialItem(
-                icon = R.drawable.whatap,
+                icon = R.drawable.whatsapp,
                 title = "WhatsApp",
                 subtitle = "Available Mon–Fri • 9–17"
             )
@@ -161,14 +164,22 @@ fun ContactTopCard(
 }
 
 @Composable
-fun SocialItem(icon: Int, title: String, subtitle: String) {
+fun SocialItem(
+    icon: Int,
+    title: String,
+    subtitle: String,
+    url: String? = null
+) {
+    val uriHandler = LocalUriHandler.current
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(16.dp))
+            .clickable {
+                url?.let { uriHandler.openUri(it) }
+            }
             .padding(16.dp)
-            .clickable { }
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
