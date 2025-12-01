@@ -210,26 +210,6 @@ private fun NationalScholarshipPortalTopAppBar() {
     )
 }
 
-@Composable
-fun Step(stepNumber: Int, title: String, content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Step $stepNumber: $title",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Indigo
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            content()
-        }
-    }
-}
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NationalScholarshipPortalScreenPreview() {
