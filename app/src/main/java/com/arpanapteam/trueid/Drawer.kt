@@ -18,11 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDrawer(onClose: () -> Unit) {
+fun AppDrawer(navController: NavHostController, onClose: () -> Unit)
+{
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),
         drawerContainerColor = Color.White
@@ -64,11 +67,24 @@ fun AppDrawer(onClose: () -> Unit) {
             Spacer(Modifier.height(32.dp))
 
             // Menu Items
-            DrawerMenuItem(icon = Icons.Outlined.Info, text = "About Us")
-            DrawerMenuItem(icon = Icons.AutoMirrored.Outlined.Article, text = "Terms & Conditions", hasNotification = true)
+            DrawerMenuItem(icon = Icons.Outlined.Info, text = "About Us", onClick = {
+                navController.navigate("about")
+                onClose()
+            })
+            DrawerMenuItem(icon = Icons.AutoMirrored.Outlined.Article, text = "Terms & Conditions", hasNotification = true,
+                onClick = {
+                navController.navigate("terms&conditions")
+                onClose()
+            })
             ThemeMenuItem()
-            DrawerMenuItem(icon = Icons.Outlined.Feedback, text = "Feedback")
-            DrawerMenuItem(icon = Icons.Outlined.Chat, text = "Contact Us")
+            DrawerMenuItem(icon = Icons.Outlined.Feedback, text = "Feedback", onClick = {
+                navController.navigate("feedback")
+                onClose()
+            })
+            DrawerMenuItem(icon = Icons.Outlined.Chat, text = "Contact Us", onClick = {
+                navController.navigate("contact")
+                onClose()
+            })
 
             Spacer(Modifier.weight(1f))
 
@@ -97,10 +113,11 @@ fun AppDrawer(onClose: () -> Unit) {
 }
 
 @Composable
-fun DrawerMenuItem(icon: ImageVector, text: String, hasNotification: Boolean = false) {
+fun DrawerMenuItem(icon: ImageVector, text: String, hasNotification: Boolean = false, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable{onClick()}
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -136,5 +153,5 @@ fun ThemeMenuItem() {
 @Preview
 @Composable
 fun AppDrawerPreview() {
-    AppDrawer(onClose = {})
+//    AppDrawer(onClose = {})
 }

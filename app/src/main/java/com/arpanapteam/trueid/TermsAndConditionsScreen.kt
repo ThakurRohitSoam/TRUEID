@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,15 +15,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import com.arpanapteam.trueid.ui.theme.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavHostController
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TermsAndConditionsScreen() {
+fun TermsAndConditionsScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { TermsAndConditionsTopAppBar() }
+        topBar = { TermsAndConditionsTopAppBar(navController) },
+        containerColor = OffWhite
     ) {
         LazyColumn(
             modifier = Modifier
@@ -69,21 +72,25 @@ fun TermsAndConditionsScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TermsAndConditionsTopAppBar() {
+fun TermsAndConditionsTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("Terms and Conditions") },
+        title = { Text("Terms and Conditions", color = Color.Black) },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = OffWhite)
     )
 }
 
 @Composable
 fun Term(number: Int, title: String, content: @Composable () -> Unit) {
     Column {
-        Text("$number. $title", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("$number. $title", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
         content()
     }
@@ -93,6 +100,6 @@ fun Term(number: Int, title: String, content: @Composable () -> Unit) {
 @Composable
 fun TermsAndConditionsScreenPreview() {
     TRUEIDTheme {
-        TermsAndConditionsScreen()
+//        TermsAndConditionsScreen()
     }
 }

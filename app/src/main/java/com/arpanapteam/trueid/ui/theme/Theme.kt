@@ -47,7 +47,9 @@ fun TRUEIDTheme(
         }
 
         darkTheme -> DarkColorScheme
+//        darkTheme -> LightColorScheme
         else -> LightColorScheme
+
     }
 
     MaterialTheme(

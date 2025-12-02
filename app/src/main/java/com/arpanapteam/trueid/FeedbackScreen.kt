@@ -3,9 +3,9 @@ package com.arpanapteam.trueid
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,15 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedbackScreen() {
+fun FeedbackScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { FeedbackTopAppBar() },
+        topBar = { FeedbackTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         Column(
@@ -37,7 +38,8 @@ fun FeedbackScreen() {
                 text = "Your Feedback Matters",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp),
+                color = Color.Black
             )
 
             FeedbackForm()
@@ -47,12 +49,14 @@ fun FeedbackScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedbackTopAppBar() {
+fun FeedbackTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("Feedback", fontWeight = FontWeight.Bold) },
+        title = { Text("Feedback", fontWeight = FontWeight.Bold, color = Color.Black) },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Outlined.VerifiedUser, contentDescription = "User Profile")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -132,6 +136,6 @@ fun FeedbackForm() {
 @Composable
 fun FeedbackScreenPreview() {
     TRUEIDTheme {
-        FeedbackScreen()
+//        FeedbackScreen()
     }
 }

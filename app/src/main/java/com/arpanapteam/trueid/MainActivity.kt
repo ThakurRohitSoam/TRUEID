@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.WindowInsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -48,18 +48,21 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
 
-                        composable("home") { TrueIdHomeScreen() }
+                        composable("home") { TrueIdHomeScreen(navController) }
                         composable("services") { ServicesScreen(navController) }
-                        composable("news") { NewsScreen() }
-                        composable("feedback") { FeedbackScreen() }
-                        composable("income_certificate") { IncomeCertificateScreen() }
-//                        composable("domicile_certificate") { DomicileCertificateScreen()
+                        composable("news") { NewsScreen(navController) }
+                        composable("feedback") { FeedbackScreen(navController) }
+                        composable("income_certificate") { IncomeCertificateScreen(navController) }
+                        composable ("about"){ AboutScreen(navController)}
+                        composable ("terms&conditions"){ TermsAndConditionsScreen(navController)}
+
+                        composable("contact") { GetInTouchScreen(navController)}}
                     }
                 }
             }
         }
     }
-}
+
 
 @Composable
 fun TrueIdBottomBar(navController: NavController) {

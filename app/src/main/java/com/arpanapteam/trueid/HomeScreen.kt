@@ -24,18 +24,19 @@ import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun TrueIdHomeScreen() {
+fun TrueIdHomeScreen(navController: NavHostController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            AppDrawer(onClose = { scope.launch { drawerState.close() } })
+            AppDrawer(onClose = { scope.launch { drawerState.close() } }, navController=navController)
         }
     ) {
         Scaffold(
@@ -114,7 +115,7 @@ fun TrueIdTopAppBar(onMenuClick: () -> Unit) {
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
             }
         },
         actions = {
@@ -224,7 +225,7 @@ fun ServiceItemRow(item: ServiceItem) {
 @Composable
 fun TrueIdHomeScreenPreview() {
     TRUEIDTheme { // Use your actual theme
-       TrueIdHomeScreen()
+//       TrueIdHomeScreen()
 //
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.VerifiedUser
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.*
 
 data class NewsArticle(
@@ -36,7 +38,7 @@ data class NewsArticle(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsScreen() {
+fun NewsScreen(navController: NavHostController) {
     val newsItems = listOf(
         NewsArticle(
             tag = "Deadline Alert",
@@ -52,7 +54,8 @@ fun NewsScreen() {
             title = "Digitalizing Government Services: A New Era of Efficiency and Accessibility",
             content = "", // No content in the image
             image = painterResource(id = R.drawable.digital_india),
-            tagColor = Color.Yellow
+            tagColor = Color.Green,
+//            content = Color.Black
         ),
         NewsArticle(
             tag = "Latest News",
@@ -60,7 +63,7 @@ fun NewsScreen() {
             title = "E-District Services Portal Now Faster and More Secure",
             content = "The E-District portal for Uttar Pradesh has undergone a major",
             image = painterResource(id = R.drawable.e_district),
-            tagColor = Color.Yellow
+            tagColor = Color.Green
         ),
         NewsArticle(
             tag = "Public Notice",
@@ -68,12 +71,12 @@ fun NewsScreen() {
             title = "Applications Open for Skill Development Programs",
             content = "Government-sponsored skill development programs are now",
             image = painterResource(id = R.drawable.skill_development),
-            tagColor = Color.Yellow
+            tagColor = Color.Green
         )
     )
 
     Scaffold(
-        topBar = { NewsTopAppBar() },
+        topBar = { NewsTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
@@ -90,12 +93,14 @@ fun NewsScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsTopAppBar() {
+fun NewsTopAppBar(navController:NavHostController) {
     TopAppBar(
-        title = { Text("News", fontWeight = FontWeight.Bold) },
+        title = { Text("News", fontWeight = FontWeight.Bold, color = Color.Black) },
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Outlined.VerifiedUser, contentDescription = "User Profile")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -140,7 +145,8 @@ fun NewsCard(article: NewsArticle) {
                         text = article.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        lineHeight = 24.sp
+                        lineHeight = 24.sp,
+                        color = Color.Black
                     )
                     if (article.content.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
@@ -182,10 +188,10 @@ fun NewsCard(article: NewsArticle) {
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
-fun NewsScreenPreview() {
+fun NewsScreenPreview(navController: NavHostController) {
     TRUEIDTheme {
-        NewsScreen()
+        NewsScreen(navController)
     }
 }

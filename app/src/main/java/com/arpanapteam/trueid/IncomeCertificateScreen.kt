@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
@@ -20,15 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncomeCertificateScreen() {
+fun IncomeCertificateScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { IncomeCertificateTopAppBar() },
+        topBar = { IncomeCertificateTopAppBar(navController) },
         containerColor = OffWhite,
         bottomBar = {
             Button(
@@ -132,14 +134,16 @@ fun IncomeCertificateScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncomeCertificateTopAppBar() {
+fun IncomeCertificateTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("Income Certificate") },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-        }
+        },
     )
 }
 
@@ -167,6 +171,6 @@ fun Step(stepNumber: Int, title: String, content: @Composable () -> Unit) {
 @Composable
 fun IncomeCertificateScreenPreview() {
     TRUEIDTheme {
-        IncomeCertificateScreen()
+//        IncomeCertificateScreen()
     }
 }

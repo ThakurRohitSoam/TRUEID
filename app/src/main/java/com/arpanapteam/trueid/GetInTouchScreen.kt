@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Share
@@ -22,14 +21,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import com.arpanapteam.trueid.ui.theme.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GetInTouchScreen() {
+fun GetInTouchScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { GetInTouchTopAppBar() }
+        topBar = { GetInTouchTopAppBar(navController) },
+        containerColor = OffWhite
     ) {
         LazyColumn(
             modifier = Modifier
@@ -72,21 +76,30 @@ fun GetInTouchScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GetInTouchTopAppBar() {
+fun GetInTouchTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("Get In Touch") },
+        title = { Text("Get In Touch",color=Color.Black) },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = OffWhite
+    )
     )
 }
 
 @Composable
 fun ContactCard(icon: ImageVector, title: String, subtitle: String) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -95,8 +108,8 @@ fun ContactCard(icon: ImageVector, title: String, subtitle: String) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(16.dp))
             Column {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium)
+                Text(text = title, style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = Color.Black)
             }
         }
     }
@@ -106,6 +119,6 @@ fun ContactCard(icon: ImageVector, title: String, subtitle: String) {
 @Composable
 fun GetInTouchScreenPreview() {
     TRUEIDTheme {
-        GetInTouchScreen()
+//        GetInTouchScreen()
     }
 }

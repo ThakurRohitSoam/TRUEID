@@ -3,22 +3,25 @@ package com.arpanapteam.trueid
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import androidx.navigation.NavHostController
+import com.arpanapteam.trueid.ui.theme.*
 
 data class Service(val name: String, val description: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen() {
+fun AboutScreen(navController: NavHostController) {
     val services = listOf(
         Service("Aadhar Card", "A 12-digit unique identity number for Indian citizens, storing biometric and demographic data."),
         Service("PAN Card", "A 10-digit alphanumeric number assigned to all taxpayers in India for tracking financial transactions."),
@@ -32,7 +35,8 @@ fun AboutScreen() {
     )
 
     Scaffold(
-        topBar = { AboutTopAppBar() }
+        topBar = { AboutTopAppBar(navController) }
+        ,containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -90,14 +94,16 @@ fun AboutScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutTopAppBar() {
+fun AboutTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("About") },
+        title = { Text("About",color = Color.Black) },
         navigationIcon = {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-        }
+        },
     )
 }
 
@@ -105,6 +111,6 @@ fun AboutTopAppBar() {
 @Composable
 fun AboutScreenPreview() {
     TRUEIDTheme {
-        AboutScreen()
+//        AboutScreen()
     }
 }
