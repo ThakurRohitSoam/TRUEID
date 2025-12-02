@@ -49,16 +49,19 @@ fun AboutScreen(navController: NavHostController) {
                     Text(
                         text = "About TRUEID",
                         fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Welcome to our Self-Service Portal. Our mission is to provide comprehensive and easy-to-understand information about services and schemes offered by the Government of India. We offer not just information, but also direct links and step-by-step instructions to help you access these services without hassle. Everything you need is right here in one place.",
                         textAlign = TextAlign.Center,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color= Color.Black
                     )
+
                 }
             }
 
@@ -66,25 +69,27 @@ fun AboutScreen(navController: NavHostController) {
                 Text(
                     text = "Services We Cover",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
+//                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    color= Color.Black,
+                    fontWeight = FontWeight.Medium
                 )
             }
 
             item {
                 Row(modifier = Modifier.padding(bottom = 8.dp)) {
-                    Text("#", modifier = Modifier.width(32.dp), fontWeight = FontWeight.Bold)
-                    Text("SERVICE", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text("DESCRIPTION", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold)
+                    Text("#", modifier = Modifier.width(32.dp), color = Color.Black,fontWeight = FontWeight.Medium)
+                    Text("SERVICE", modifier = Modifier.weight(1f), color = Color.Black,fontWeight = FontWeight.Medium)
+                    Text("DESCRIPTION", modifier = Modifier.weight(2f), color = Color.Black,fontWeight = FontWeight.Medium)
                 }
             }
 
             items(services.size) { index ->
                 val service = services[index]
                 Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text((index + 1).toString(), modifier = Modifier.width(32.dp))
-                    Text(service.name, modifier = Modifier.weight(1f))
-                    Text(service.description, modifier = Modifier.weight(2f), fontSize = 14.sp)
+                    Text((index + 1).toString(), modifier = Modifier.width(32.dp),color=Color.Black,fontWeight = FontWeight.Medium)
+                    Text(service.name, modifier = Modifier.weight(1f),color = Color.Black,fontWeight = FontWeight.Medium)
+                    Text(service.description, modifier = Modifier.weight(2f), fontSize = 14.sp,color= Color.Black)
                 }
                 Divider()
             }
@@ -96,7 +101,8 @@ fun AboutScreen(navController: NavHostController) {
 @Composable
 fun AboutTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("About",color = Color.Black) },
+//        Text
+        title = { Text("About",color = Color.Black, fontWeight = FontWeight.Black) },
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigateUp()
@@ -104,6 +110,9 @@ fun AboutTopAppBar(navController: NavHostController) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = OffWhite)
+
     )
 }
 

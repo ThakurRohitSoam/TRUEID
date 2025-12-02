@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun TermsAndConditionsScreen(navController: NavHostController) {
     Scaffold(
         topBar = { TermsAndConditionsTopAppBar(navController) },
@@ -37,33 +38,33 @@ fun TermsAndConditionsScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text("Terms and Conditions", style = MaterialTheme.typography.headlineSmall)
+                Text("Terms and Conditions", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Medium, color = Color.Black)
             }
             item {
                 Term(number = 1, title = "Introduction") {
-                    Text("Welcome to our TRUEID App. These Terms and Conditions govern your use of our application. By using our app, you accept these terms and conditions in full. If you disagree with these terms and conditions or any part of these terms and conditions, you must not use our application.")
+                    Text("Welcome to our TRUEID App. These Terms and Conditions govern your use of our application. By using our app, you accept these terms and conditions in full. If you disagree with these terms and conditions or any part of these terms and conditions, you must not use our application.",color = Color.Black)
                 }
             }
             item {
                 Term(number = 2, title = "Non-Affiliation and Educational Purpose") {
-                    Text("Our application is a non-governmental, independent entity. We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with any government agency. The information provided in this application is for educational purposes only. We do not provide any government services.")
+                    Text("Our application is a non-governmental, independent entity. We are not affiliated, associated, authorized, endorsed by, or in any way officially connected with any government agency. The information provided in this application is for educational purposes only. We do not provide any government services.",color = Color.Black)
                 }
             }
             item {
                 Term(number = 3, title = "Information Sources") {
-                    Text("The information and resources provided in our application are sourced from various publicly available government websites, including but not limited to official government portals and news outlets. We strive to provide accurate and up-to-date information, but we do not guarantee the completeness, accuracy, or timeliness of the information.")
+                    Text("The information and resources provided in our application are sourced from various publicly available government websites, including but not limited to official government portals and news outlets. We strive to provide accurate and up-to-date information, but we do not guarantee the completeness, accuracy, or timeliness of the information.",color = Color.Black)
                 }
             }
             item {
                 Term(number = 4, title = "Use of Information") {
-                    Text("The content of this application is for general information and educational purposes only. Any reliance you place on such information is therefore strictly at your own risk. We do not provide legal, financial, or any other professional advice. Every effort is made to keep the application up and running smoothly. However, we take no responsibility for, and will not be liable for, the application being temporarily unavailable due to technical issues beyond our control.")
+                    Text("The content of this application is for general information and educational purposes only. Any reliance you place on such information is therefore strictly at your own risk. We do not provide legal, financial, or any other professional advice. Every effort is made to keep the application up and running smoothly. However, we take no responsibility for, and will not be liable for, the application being temporarily unavailable due to technical issues beyond our control.",color = Color.Black)
                 }
             }
             item {
                 Term(number = 5, title = "Data Accuracy and Liability Disclaimer") {
-                    Text("While we strive to keep the information up to date and correct, we make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability with respect to the application or the information, products, services, or related graphics contained in the application for any purpose. Any reliance you place on such information is therefore strictly at your own risk.")
+                    Text("While we strive to keep the information up to date and correct, we make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability with respect to the application or the information, products, services, or related graphics contained in the application for any purpose. Any reliance you place on such information is therefore strictly at your own risk.",color = Color.Black)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this application.")
+                    Text("In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this application.",color = Color.Black)
                 }
             }
         }
@@ -74,7 +75,7 @@ fun TermsAndConditionsScreen(navController: NavHostController) {
 @Composable
 fun TermsAndConditionsTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("Terms and Conditions", color = Color.Black) },
+        title = { Text("Terms and Conditions", color = Color.Black, fontWeight = FontWeight.Bold) },
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigateUp()
@@ -90,7 +91,7 @@ fun TermsAndConditionsTopAppBar(navController: NavHostController) {
 @Composable
 fun Term(number: Int, title: String, content: @Composable () -> Unit) {
     Column {
-        Text("$number. $title", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text("$number. $title", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
         content()
     }

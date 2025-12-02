@@ -25,7 +25,10 @@ import com.arpanapteam.trueid.ui.theme.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,8 +47,8 @@ fun GetInTouchScreen(navController: NavHostController) {
         ) {
             item {
                 ContactCard(
-                    icon = Icons.Outlined.Share,
-                    title = "Instagram",
+                    icon = Icons.Outlined.AccountBox,
+                    title ="Instagram",
                     subtitle = "Follow us on Instagram for latest updates and news."
                 )
             }
@@ -65,7 +68,7 @@ fun GetInTouchScreen(navController: NavHostController) {
             }
             item {
                 ContactCard(
-                    icon = Icons.Outlined.Share,
+                    icon = Icons.Outlined.ArrowDownward,
                     title = "YouTube",
                     subtitle = "Subscribe to our YouTube channel for tutorials and guides."
                 )
@@ -78,17 +81,16 @@ fun GetInTouchScreen(navController: NavHostController) {
 @Composable
 fun GetInTouchTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("Get In Touch",color=Color.Black) },
+        title = { Text("Get In Touch",color=Color.Black, fontWeight = FontWeight.Bold) },
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigateUp()
-            }) {
+                navController.popBackStack()
+            })
+            {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = OffWhite
-    )
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = OffWhite)
     )
 }
 
