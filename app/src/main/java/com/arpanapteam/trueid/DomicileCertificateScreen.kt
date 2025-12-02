@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
@@ -64,7 +66,7 @@ fun DomicileCertificateScreen(navController: NavHostController) {
                     Text("Follow these instructions after logging in:")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("1. Login to the portal with your credentials.")
-                    Text("2. Select "Application For Domicile Certificate" from the dashboard.")
+                    Text("2. Select Application For Domicile Certificatefrom the dashboard.")
                     Text("3. Fill in all the required details accurately.")
                     Text("4. Upload the prepared documents.")
                     Text("5. Submit the form and note down the Application Number.")
@@ -99,6 +101,6 @@ fun DomicileCertificateTopAppBar(navController: NavHostController) {
 @Composable
 fun DomicileCertificateScreenPreview() {
     TRUEIDTheme {
-        DomicileCertificateScreen()
+//        DomicileCertificateScreen()
     }
 }

@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
                         composable("services") { ServicesScreen() }
                         composable("news") { NewsScreen() }
                         composable("feedback") { FeedbackScreen() }
+
                     }
                 }
             }

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import androidx.navigation.NavHostController
 
 
 // Data class to hold the service link information
@@ -215,6 +216,6 @@ private fun NationalScholarshipPortalTopAppBar(navController: NavHostController)
 @Composable
 fun NationalScholarshipPortalScreenPreview() {
     TRUEIDTheme {
-        NationalScholarshipPortalScreen()
+//        NationalScholarshipPortalScreen()
     }
 }

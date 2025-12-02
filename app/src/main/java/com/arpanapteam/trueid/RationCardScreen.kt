@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
@@ -52,9 +53,9 @@ private val rationCardServiceLinks = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RationCardScreen(onBackClick: () -> Unit,onLinkClick:(String)  -> Unit) {
+fun RationCardScreen(onBackClick: () -> Unit,onLinkClick:(String)  -> Unit,navController: NavHostController) {
     Scaffold(
-        topBar = { RationCardTopAppBar() },
+        topBar = { RationCardTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
@@ -198,7 +199,7 @@ private fun ServiceLinkRow(index: String, service: String, linkText: String, onL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RationCardTopAppBar() {
+private fun RationCardTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("Ration Card") },
         navigationIcon = {
@@ -217,6 +218,6 @@ private fun RationCardTopAppBar() {
 @Composable
 fun RationCardScreenPreview() {
     TRUEIDTheme {
-        RationCardScreen()
+//        RationCardScreen()
     }
 }

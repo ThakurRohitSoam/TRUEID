@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,12 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.navigation.NavHostController
 
 // Data class to hold the service link information
 private data class ServiceLink(
@@ -84,7 +80,7 @@ fun FamilyIDScreen(navController: NavHostController) {
             // TODO: Add Instruction for this service later if requested
             item {
                 Text(
-                    text = "HOW TO APPLY PROCEDURE"
+                    text = "HOW TO APPLY PROCEDURE",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -117,7 +113,7 @@ fun FamilyIDScreen(navController: NavHostController) {
 
             item {
                 Text(
-                    text = "HOW TO UPDATE PROCEDURE"
+                    text = "HOW TO UPDATE PROCEDURE",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -265,6 +261,6 @@ private fun FamilyIDTopAppBar(navController: NavHostController) {
 @Composable
 fun FamilyIDScreenPreview() {
     TRUEIDTheme {
-        FamilyIDScreen()
+//        FamilyIDScreen()
     }
 }
