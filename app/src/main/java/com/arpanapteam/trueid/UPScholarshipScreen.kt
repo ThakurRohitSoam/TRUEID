@@ -39,11 +39,12 @@ import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UPScholarshipScreen() {
+fun UPScholarshipScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { UPScholarshipTopAppBar() },
+        topBar = { UPScholarshipTopAppBar(navController) },
         containerColor = OffWhite,
         bottomBar = {
             Button(
@@ -125,12 +126,12 @@ private fun ServiceLinkItem(index: String, serviceName: String, linkText: String
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UPScholarshipTopAppBar() {
+fun UPScholarshipTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("UP Scholarship") },
         navigationIcon = {
-            IconButton(onClick = { /* TODO: Handle back navigation */ }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         }
     )

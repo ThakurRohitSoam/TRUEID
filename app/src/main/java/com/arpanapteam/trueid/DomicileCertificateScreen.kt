@@ -20,9 +20,9 @@ import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DomicileCertificateScreen() {
+fun DomicileCertificateScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { DomicileCertificateTopAppBar() },
+        topBar = { DomicileCertificateTopAppBar(navController) },
         containerColor = OffWhite,
         bottomBar = {
             Button(
@@ -33,7 +33,7 @@ fun DomicileCertificateScreen() {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo)
             ) {
-                Text("Go to e-Sathi Portal", modifier = Modifier.padding(8.dp))
+            Text("Go to e-Sathi Portal", modifier = Modifier.padding(8.dp)) 
             }
         }
     ) { paddingValues ->
@@ -83,12 +83,13 @@ fun DomicileCertificateScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DomicileCertificateTopAppBar() {
+fun DomicileCertificateTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("Domicile Certificate") },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {
+                navController.navigateUp() }) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         }
     )

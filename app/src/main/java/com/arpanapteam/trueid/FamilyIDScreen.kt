@@ -37,6 +37,9 @@ import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.navigation.NavHostController
 
 // Data class to hold the service link information
 private data class ServiceLink(
@@ -55,9 +58,9 @@ private val serviceLinks = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FamilyIDScreen() {
+fun FamilyIDScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { FamilyIDTopAppBar() },
+        topBar = { FamilyIDTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
@@ -242,12 +245,12 @@ private fun ServiceLinkRow(index: String, service: String, linkText: String, onL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FamilyIDTopAppBar() {
+private fun FamilyIDTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("Family ID") },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack()}) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = { navController.navigateUp()}) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

@@ -19,9 +19,9 @@ import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CasteCertificateScreen() {
+fun CasteCertificateScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { CasteCertificateTopAppBar() },
+        topBar = { CasteCertificateTopAppBar(navController) },
         containerColor = OffWhite,
         bottomBar = {
             Button(
@@ -83,12 +83,12 @@ fun CasteCertificateScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CasteCertificateTopAppBar() {
+fun CasteCertificateTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("Caste Certificate") },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         }
     )

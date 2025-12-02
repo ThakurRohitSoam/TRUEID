@@ -38,6 +38,7 @@ import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 
+
 // Data class to hold the service link information
 private data class ServiceLink(val index: Int, val serviceName: String, val linkText: String)
 
@@ -51,9 +52,9 @@ private val nationalScholarshipLinks = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NationalScholarshipPortalScreen( onBackClick: () -> Unit,
-onLinkClick: (String) -> Unit ) {
+onLinkClick: (String) -> Unit,navController: NavHostController ) {
     Scaffold(
-        topBar = { NationalScholarshipPortalTopAppBar() },
+        topBar = { NationalScholarshipPortalTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
@@ -195,12 +196,12 @@ private fun ServiceLinkRow(index: String, service: String, linkText: String, onL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NationalScholarshipPortalTopAppBar() {
+private fun NationalScholarshipPortalTopAppBar(navController: NavHostController) {
     TopAppBar(
         title = { Text("National Scholarship Portal") },
         navigationIcon = {
-            IconButton(onClick = {navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {navController.navigateUp() }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
