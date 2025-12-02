@@ -52,6 +52,24 @@ class MainActivity : ComponentActivity() {
                         composable("services") { ServicesScreen() }
                         composable("news") { NewsScreen() }
                         composable("feedback") { FeedbackScreen() }
+                         composable("domicile_certificate"){
+                            DomicileCertificateScreen()
+                        }
+                        composable("caste_certificate"){
+                            CasteCertificateScreen()
+                        }
+                        composable("ration_card") { 
+                            RationCardScreen()    
+                        }
+                        composable("family_id") { 
+                            FamilyIDScreen()
+                         }
+                        composable("up_scholarship"){
+                            UPScholarshipScreen()
+                        }
+                        composable("national_scholarship"){
+                            NationalScholarshipPortalScreen()
+                        }
 
                     }
                 }
