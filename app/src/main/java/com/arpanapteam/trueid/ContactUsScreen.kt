@@ -34,7 +34,8 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
                     IconButton(onClick = { onBack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.back),
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            modifier = Modifier.size(28.dp)   // ⬅️ Bigger Back Button
                         )
                     }
                 }
@@ -92,7 +93,7 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
             Spacer(Modifier.height(25.dp))
 
             Text(
-                "Contact us in Social Media",
+                "Social Media",
                 fontSize = 14.sp,
                 color = Color.DarkGray
             )
@@ -101,6 +102,18 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
 
             // ----------- SOCIAL LINKS LIST --------------
             SocialItem(
+                icon = R.drawable.arattai,
+                title = "Arattai",
+                subtitle = "Available Mon–Fri • 9–17",
+                url ="https://aratt.ai/@trueid"
+            )
+            SocialItem(
+                icon = R.drawable.telegram,
+                title = "Telegram",
+                subtitle = "0 Followers • 0 Posts",
+                url = "https://t.me/+XmlbmJdZ_ZJkZTU1"
+            )
+            SocialItem(
                 icon = R.drawable.instagram,
                 title = "Instagram",
                 subtitle = "0 Followers • 0 Posts",
@@ -108,22 +121,16 @@ fun ContactUsScreen(onBack: () -> Unit = {}) {
             )
 
             SocialItem(
-                icon = R.drawable.telegram,
-                title = "Telegram",
-                subtitle = "0 Followers • 0 Posts",
-                url = "https://t.me/+XmlbmJdZ_ZJkZTU1"
+                icon = R.drawable.whatsapp,
+                title = "WhatsApp",
+                subtitle = "Available Mon–Fri • 9–17",
+                url ="https://whatsapp.com/channel/0029VbBS0fbDzgT9GFgZEe3x"
             )
 
             SocialItem(
                 icon = R.drawable.facebook,
                 title = "Facebook",
                 subtitle = "0 Followers • 0 Posts"
-            )
-
-            SocialItem(
-                icon = R.drawable.whatsapp,
-                title = "WhatsApp",
-                subtitle = "Available Mon–Fri • 9–17"
             )
         }
     }

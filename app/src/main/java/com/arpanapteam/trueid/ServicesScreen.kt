@@ -35,7 +35,7 @@ fun ServicesScreen(navController: NavController) {
 
     Scaffold(
         containerColor = OffWhite,
-        topBar = { ServiceTopAppBar() },
+        topBar = { ServiceTopAppBar(navController) },   // FIXED
     ) { paddingValues ->
 
         LazyColumn(
@@ -46,6 +46,7 @@ fun ServicesScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
+            // Search Box
             item {
                 var searchQuery by remember { mutableStateOf("") }
 
@@ -65,6 +66,7 @@ fun ServicesScreen(navController: NavController) {
                 )
             }
 
+            // Popular Services
             item {
                 ServiceCategorySection(title = "Popular Services") {
                     ServiceItemCard(
@@ -84,13 +86,14 @@ fun ServicesScreen(navController: NavController) {
                     ServiceItemCard(
                         service = ServiceData(
                             "Scholarship Scheme",
-                            "Find and apply for various government Scholarship programs.",
+                            "Find and apply for various government Scholarships.",
                             Icons.Outlined.School
                         )
                     )
                 }
             }
 
+            // Document Services
             item {
                 ServiceCategorySection(title = "Document Services") {
 
@@ -121,26 +124,30 @@ fun ServicesScreen(navController: NavController) {
                 }
             }
 
+            // Utility Services
             item {
                 ServiceCategorySection(title = "Utility Services") {
+
                     ServiceItemCard(
                         service = ServiceData(
                             "Driving License",
-                            "Apply for a new or renew your driving license.",
+                            "Apply for or renew your driving license.",
                             Icons.Outlined.CarRental
                         )
                     )
+
                     ServiceItemCard(
                         service = ServiceData(
                             "Property Registration",
-                            "Register property deeds and obtain land records.",
+                            "Register property deeds and land records.",
                             Icons.Outlined.HomeWork
                         )
                     )
+
                     ServiceItemCard(
                         service = ServiceData(
                             "University Admissions",
-                            "Information and application for state university admissions.",
+                            "Details & applications for state university admissions.",
                             Icons.Outlined.Assignment
                         )
                     )
@@ -152,7 +159,7 @@ fun ServicesScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceTopAppBar() {
+fun ServiceTopAppBar(navController: NavController) {
     TopAppBar(
         title = {
             Text(
@@ -162,13 +169,11 @@ fun ServiceTopAppBar() {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { /* optional back / drawer */ }) {
+            IconButton(onClick = { navController.popBackStack() }) {   // BACK FIXED 🔥
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        )
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
 }
 
@@ -194,9 +199,7 @@ fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            content()
-        }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { content() }
     }
 }
 
@@ -214,6 +217,7 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -228,7 +232,9 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
                     modifier = Modifier.size(24.dp)
                 )
             }
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = service.title,
@@ -242,6 +248,7 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
                     color = TextGray
                 )
             }
+
             Icon(
                 imageVector = Icons.Outlined.ArrowForward,
                 contentDescription = "Go",
@@ -255,8 +262,7 @@ fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
 @Composable
 fun ServicesScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme(darkTheme = false) {   // 👈 REQUIRED
+    TRUEIDTheme(darkTheme = false) {
         ServicesScreen(navController)
     }
 }
-

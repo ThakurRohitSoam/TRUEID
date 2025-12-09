@@ -126,8 +126,17 @@ fun MainAppUI(
                 }
 
                 composable("news") {
-                    NewsScreen()
+                    NewsScreen(navController)
                 }
+
+                composable("news_detail/{newsId}") { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("newsId")?.toIntOrNull() ?: -1
+                    NewsDetailScreen(
+                        newsId = id,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
 
                 composable("contact") {
                     ContactUsScreen { navController.popBackStack() }
