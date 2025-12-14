@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,25 +36,25 @@ import androidx.navigation.NavHostController
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
-
+import androidx.compose.material.icons.filled.ArrowBack
 
 // Data class to hold the service link information
-//public data class ServiceLink(val index: Int, val serviceName: String, val linkText: String)
+data class ServiceLink(val index: Int, val serviceName: String, val linkText: String)
 
 // List of services shown on the screen
-private val nationalScholarshipLinks = listOf(
-    ServiceLink(1, "New Student Registration", "Register Here"),
-    ServiceLink(2, "Check Your Eligibility", "Check Here"),
-    ServiceLink(3, "Track NSP Payments (via PFMS)", "Track Here")
+private val rationCardServiceLinks = listOf(
+    ServiceLink(1, "UP Ration Card Official Website (FCS)", "Go to Website"),
+    ServiceLink(2, "National Food Security Act (NFSA) Portal", "Go to Website"),
+    ServiceLink(3, "Check Eligibility in List", "Check Here"),
+    ServiceLink(4, "Check Application Status", "Track Here"),
+    ServiceLink(5, "Search & Download Your Ration Card", "Search Here")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NationalScholarshipPortalScreen( onBackClick: () -> Unit,
-onLinkClick: (String) -> Unit,navController: NavHostController
-) {
+fun RationCardScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { NationalScholarshipPortalTopAppBar(navController) },
+        topBar = { RationCardTopAppBar(navController) },
         containerColor = OffWhite
     ) { paddingValues ->
         LazyColumn(
@@ -68,13 +66,13 @@ onLinkClick: (String) -> Unit,navController: NavHostController
         ) {
             item {
                 Text(
-                    text = "National Scholarship Portal (NSP)",
+                    text = "Ration Card Services (UP)",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                NationalScholarshipLinksCard()
+                RationCardServiceLinksCard()
             }
 
             // TODO: Add steps for this service later as requested
@@ -95,7 +93,7 @@ onLinkClick: (String) -> Unit,navController: NavHostController
 }
 
 @Composable
-private fun NationalScholarshipLinksCard() {
+private fun RationCardServiceLinksCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -104,22 +102,24 @@ private fun NationalScholarshipLinksCard() {
         Column {
             ServiceLinkHeader()
             Divider(color = Color.LightGray.copy(alpha = 0.5f))
-            nationalScholarshipLinks.forEach { serviceLink ->
+            rationCardServiceLinks.forEach { serviceLink ->
                 ServiceLinkRow(
                     index = serviceLink.index.toString(),
                     service = serviceLink.serviceName,
                     linkText = serviceLink.linkText,
-                    onLinkClick = {  
-                    //     val url = when (serviceLink.index) {
-                    //         1 -> "https://scholarships.gov.in/fresh/newstdRegfrm.action"
-                    //         2 -> "https://scholarships.gov.in/schemesEligibility"
-                    //         3 -> "https://pfms.nic.in/static/NewLayoutCommonContent.aspx?RequestPagename=static/TrackNSPpayments.aspx"
-                    //         else -> ""
-                    // }
-                    // onLinkClick(url)
-                 }
+                    onLinkClick = {
+                        // val url = when (serviceLink.index) {
+                        //     1 -> "https://fcs.up.gov.in/"
+                        //     2 -> "https://nfsa.gov.in/"
+                        //     3 -> "https://fcs.up.gov.in/Food/citizen/NFSASearch.aspx"
+                        //     4 -> "https://apps.uppwd.gov.in/main-page/status.html" // Example URL, replace with actual
+                        //     5 -> "https://fcs.up.gov.in/Food/citizen/NFSASearch.aspx"
+                        //     else -> ""
+                        // }
+                        // onLinkClick(url)
+                    }
                 )
-                if (serviceLink.index < nationalScholarshipLinks.size) {
+                if (serviceLink.index < rationCardServiceLinks.size) {
                     Divider(
                         color = Color.LightGray.copy(alpha = 0.3f),
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -198,12 +198,12 @@ private fun ServiceLinkRow(index: String, service: String, linkText: String, onL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NationalScholarshipPortalTopAppBar(navController: NavHostController) {
+private fun RationCardTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = { Text("National Scholarship Portal") },
+        title = { Text("Ration Card") },
         navigationIcon = {
-            IconButton(onClick = {navController.navigateUp() }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = {navController.popBackStack() }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -215,8 +215,8 @@ private fun NationalScholarshipPortalTopAppBar(navController: NavHostController)
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun NationalScholarshipPortalScreenPreview() {
+fun RationCardScreenPreview() {
     TRUEIDTheme {
-//        NationalScholarshipPortalScreen()
+//        RationCardScreen()
     }
 }

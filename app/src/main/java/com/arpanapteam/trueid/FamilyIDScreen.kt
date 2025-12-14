@@ -42,11 +42,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.navigation.NavHostController
 
 // Data class to hold the service link information
-private data class ServiceLink(
-    val index: Int,
-    val serviceName: String,
-    val linkText: String
-)
+//public data class ServiceLink(
+//    val index: Int,
+//    val serviceName: String,
+//    val linkText: String
+//)
 
 // List of services shown on the screen
 private val serviceLinks = listOf(
@@ -84,7 +84,7 @@ fun FamilyIDScreen(navController: NavHostController) {
             // TODO: Add Instruction for this service later if requested
             item {
                 Text(
-                    text = "HOW TO APPLY PROCEDURE"
+                    text = "HOW TO APPLY PROCEDURE",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -117,7 +117,7 @@ fun FamilyIDScreen(navController: NavHostController) {
 
             item {
                 Text(
-                    text = "HOW TO UPDATE PROCEDURE"
+                    text = "HOW TO UPDATE PROCEDURE",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -265,6 +265,6 @@ private fun FamilyIDTopAppBar(navController: NavHostController) {
 @Composable
 fun FamilyIDScreenPreview() {
     TRUEIDTheme {
-        FamilyIDScreen()
+//        FamilyIDScreen()
     }
 }
