@@ -24,6 +24,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.*
 import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
+import com.arpanapteam.trueid.Services.BusTicketScreen
+import com.arpanapteam.trueid.Services.IncomeCertificateScreen
+import com.arpanapteam.trueid.Services.RailwayLinksScreen
+import com.arpanapteam.trueid.Services.ServicesScreen
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
@@ -53,7 +57,7 @@ class MainActivity : ComponentActivity() {
                     .isAppearanceLightStatusBars = !isDarkTheme
             }
 
-            TRUEIDTheme(darkTheme = isDarkTheme) {
+            TRUEIDTheme(content = {
                 MainAppUI(
                     isDarkTheme = isDarkTheme,
                     onToggleTheme = { newValue ->
@@ -62,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 )
-            }
+            })
         }
     }
 }
@@ -148,6 +152,14 @@ fun MainAppUI(
                         onSubmit = { navController.popBackStack() }
                     )
                 }
+                composable("railway") { RailwayLinksScreen() }
+
+                composable("flight") { AirlineTicketScreen { navController.popBackStack() } }
+
+                composable("metro") { MetroTicketScreen { navController.popBackStack() } }
+
+                composable("bus") { BusTicketScreen { navController.popBackStack() } }
+
             }
         }
     }

@@ -58,7 +58,7 @@ fun LaunchScreen() {
 @Composable
 fun LaunchScreenPreview() {
 
-    TRUEIDTheme(darkTheme = false) {   // REQUIRED
+    TRUEIDTheme(content = {   // REQUIRED
         LaunchScreen()
-    }
+    })
 }

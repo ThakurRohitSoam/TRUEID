@@ -88,7 +88,7 @@ fun Term(number: Int, title: String, content: @Composable () -> Unit) {
 @Composable
 fun TermsAndConditionsScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme(darkTheme = false) {   //  REQUIRED FIX
+    TRUEIDTheme(content = {   //  REQUIRED FIX
         TermsAndConditionsScreen(navController)
-    }
+    })
 }

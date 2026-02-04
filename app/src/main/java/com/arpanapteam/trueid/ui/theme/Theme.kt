@@ -32,15 +32,17 @@ private val LightScheme = lightColorScheme(
 
 @Composable
 fun TRUEIDTheme(
-    darkTheme: Boolean,             // <- ab yahan se control hoga
+    // <- ab yahan se control hoga
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme =
         if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val ctx = LocalContext.current
+            val darkTheme = false
             if (darkTheme) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
         } else {
+            val darkTheme = false
             if (darkTheme) DarkScheme else LightScheme
         }
 

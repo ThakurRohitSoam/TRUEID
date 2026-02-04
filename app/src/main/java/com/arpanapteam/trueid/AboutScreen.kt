@@ -106,8 +106,8 @@ fun AboutTopAppBar(navController: NavController) {
 @Composable
 fun AboutScreenPreview() {
     val navController = rememberNavController()
-    TRUEIDTheme(darkTheme = false) {
+    TRUEIDTheme(content = {
         AboutScreen(navController)
-    }
+    })
 }
 

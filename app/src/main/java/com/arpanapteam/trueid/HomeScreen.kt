@@ -211,7 +211,7 @@ fun ServiceItemRow(item: ServiceItem) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun TrueIdHomeScreenPreview() {
-    TRUEIDTheme(darkTheme = false) {   //  REQUIRED
+    TRUEIDTheme(content = {   //  REQUIRED
         TrueIdHomeScreen(openDrawer = {})
-    }
+    })
 }
