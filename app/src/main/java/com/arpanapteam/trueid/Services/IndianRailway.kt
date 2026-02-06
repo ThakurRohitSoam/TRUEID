@@ -1,5 +1,6 @@
 package com.arpanapteam.trueid.Services
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Train
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ data class RailwayLink(
 fun RailwayLinksScreen() {
 
     val context = LocalContext.current
+    val activity = context as? Activity
 
     val links = listOf(
         RailwayLink(
@@ -54,7 +57,14 @@ fun RailwayLinksScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Railway Services") }
+                title = { Text("Railway Services") },
+
+                // ✅ BACK BUTTON ADDED
+                navigationIcon = {
+                    IconButton(onClick = { activity?.finish() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
         }
     ) { padding ->
