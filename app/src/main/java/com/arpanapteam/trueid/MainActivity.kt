@@ -75,14 +75,13 @@ fun MainAppUI(
     isDarkTheme: Boolean,
     onToggleTheme: (Boolean) -> Unit
 ) {
+
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     val openDrawer: () -> Unit = {
-        scope.launch {
-            drawerState.open()
-        }
+        scope.launch { drawerState.open() }
     }
 
     ModalNavigationDrawer(
@@ -98,31 +97,29 @@ fun MainAppUI(
     ) {
 
         Scaffold(
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            contentWindowInsets = WindowInsets(0,0,0,0),
             bottomBar = { TrueIdBottomBar(navController) }
         ) { padding ->
 
             NavHost(
-                navController,
+                navController = navController,
                 startDestination = "home",
                 modifier = Modifier.padding(padding)
             ) {
 
-                composable("home") {
-                    TrueIdHomeScreen(openDrawer)
-                }
+                composable("home") { TrueIdHomeScreen(openDrawer) }
 
                 composable("services") {
                     ServicesScreen(navController)
                 }
 
                 composable("income_certificate") {
-                    IncomeCertificateScreen(navController as () -> Unit)
+                    IncomeCertificateScreen(
+                        onBack = { navController.popBackStack() }
+                    )
                 }
 
-                composable("railway") {
-                    RailwayLinksScreen()
-                }
+                composable("railway") { RailwayLinksScreen() }
 
                 composable("flight") {
                     AirlineTicketScreen { navController.popBackStack() }
@@ -143,16 +140,40 @@ fun MainAppUI(
                     )
                 }
 
-                composable("news") {
-                    NewsScreen(navController)
+                composable("news") { NewsScreen(navController) }
+                composable("about") { AboutScreen(navController) }
+                composable("terms") { TermsAndConditionsScreen(navController) }
+
+                // DOCUMENT SERVICES
+
+                composable("aadhar") {
+                    AadhaarServicesScreen {
+                        navController.popBackStack()
+                    }
                 }
 
-                composable("about") {
-                    AboutScreen(navController)
+                composable("pan") {
+                    PanCardScreen {
+                        navController.popBackStack()
+                    }
                 }
 
-                composable("terms") {
-                    TermsAndConditionsScreen(navController)
+                composable("voter") {
+                    VoterIdScreen {
+                        navController.popBackStack()
+                    }
+                }
+
+                composable("passport") {
+                    PassportScreen {
+                        navController.popBackStack()
+                    }
+                }
+
+                composable("dl") {
+                    DrivingLicenseScreen {
+                        navController.popBackStack()
+                    }
                 }
             }
         }
@@ -179,7 +200,7 @@ fun TrueIdBottomBar(navController: NavController) {
                 selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo(navController.graph.startDestinationId){
                             saveState = true
                         }
                         launchSingleTop = true

@@ -26,7 +26,7 @@ data class VoterService(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VoterIdScreen() {
+fun VoterIdScreen(onBack: () -> Unit = {}) {
 
     val context = LocalContext.current
     val activity = context as? Activity
@@ -80,7 +80,7 @@ fun VoterIdScreen() {
             TopAppBar(
                 title = { Text("Voter ID Services") },
                 navigationIcon = {
-                    IconButton(onClick = { activity?.finish() }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack,null)
                     }
                 }

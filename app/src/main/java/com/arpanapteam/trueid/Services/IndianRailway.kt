@@ -30,9 +30,7 @@ data class RailwayLink(
 // ---------- SCREEN ----------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RailwayLinksScreen(
-    onBack: () -> Unit = {}
-) {
+fun RailwayLinksScreen(onBack: () -> Unit = {}) {
 
     val context = LocalContext.current
 

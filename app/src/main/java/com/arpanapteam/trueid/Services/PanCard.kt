@@ -198,3 +198,4 @@ fun PanPreview() {
         PanCardScreen()
     }
 }
+

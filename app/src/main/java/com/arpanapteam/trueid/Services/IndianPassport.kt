@@ -26,7 +26,7 @@ data class PassportService(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PassportScreen() {
+fun PassportScreen(onBack: () -> Unit = {}) {
 
     val context = LocalContext.current
     val activity = context as? Activity
@@ -61,7 +61,7 @@ fun PassportScreen() {
             TopAppBar(
                 title = { Text("Indian Passport") },
                 navigationIcon = {
-                    IconButton(onClick = { activity?.finish() }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack,null)
                     }
                 }

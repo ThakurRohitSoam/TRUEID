@@ -24,7 +24,9 @@ fun IncomeCertificateScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
 
     fun open(url: String) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        )
     }
 
     Scaffold(
@@ -49,58 +51,44 @@ fun IncomeCertificateScreen(onBack: () -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // STEP 1
             item {
                 StepCard(
-                    title = "Step 1: Register on Portal",
-                    desc = "If you are a new user, first register on e-Sathi portal.",
-                    buttonText = "GO",
-                    onClick = {
-                        open("https://esathi.up.gov.in/")
-                    }
-                )
+                    "Step 1: Register on Portal",
+                    "If you are a new user, first register on e-Sathi portal.",
+                    "GO"
+                ) { open("https://esathi.up.gov.in/") }
             }
 
-            // STEP 2
             item {
                 StepCard(
-                    title = "Step 2: Prepare Documents",
-                    desc =
-                        "• Applicant Photo\n" +
-                                "• Aadhaar Card\n" +
-                                "• Self-Declaration Form\n" +
-                                "• Ration Card / Family ID\n" +
-                                "• Salary Slip (if applicable)",
-                    buttonText = "Download Form",
-                    onClick = {
-                        open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
-                    }
-                )
+                    "Step 2: Prepare Documents",
+                    "• Applicant Photo\n" +
+                            "• Aadhaar Card\n" +
+                            "• Self-Declaration Form\n" +
+                            "• Ration Card / Family ID\n" +
+                            "• Salary Slip (if applicable)",
+                    "Download Form"
+                ) {
+                    open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
+                }
             }
 
-            // STEP 3
             item {
                 StepCard(
-                    title = "Step 3: Login & Apply",
-                    desc =
-                        "Login → Select Income Certificate → Fill form → Upload documents → Pay fee → Submit.",
-                    buttonText = "GO",
-                    onClick = {
-                        open("https://esathi.up.gov.in/")
-                    }
-                )
+                    "Step 3: Login & Apply",
+                    "Login → Select Income Certificate → Fill form → Upload docs → Pay fee → Submit.",
+                    "GO"
+                ) { open("https://esathi.up.gov.in/") }
             }
 
-            // STEP 4
             item {
                 StepCard(
-                    title = "Step 4: Check Status",
-                    desc = "Track your application using application number.",
-                    buttonText = "Check Status",
-                    onClick = {
-                        open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
-                    }
-                )
+                    "Step 4: Check Status",
+                    "Track your application using application number.",
+                    "Check Status"
+                ) {
+                    open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
+                }
             }
         }
     }
@@ -113,27 +101,19 @@ fun StepCard(
     buttonText: String,
     onClick: () -> Unit
 ) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
+        Column(Modifier.padding(18.dp)) {
 
-            Text(
-                title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
             Spacer(Modifier.height(8.dp))
 
-            Text(
-                desc,
-                fontSize = 14.sp
-            )
+            Text(desc, fontSize = 14.sp)
 
             Spacer(Modifier.height(12.dp))
 
@@ -141,7 +121,9 @@ fun StepCard(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Indigo)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Indigo
+                )
             ) {
                 Text(buttonText)
             }

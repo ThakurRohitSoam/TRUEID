@@ -67,19 +67,53 @@ fun ServicesScreen(navController: NavHostController) {
 
             item {
                 ServiceCategorySection(title = "Important Documents") {
-                    ServiceItemCard(ServiceData("Aadhar Card Update", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin),onClick = {
-                        navController.navigate("aadhar")
-                    })
 
-                    ServiceItemCard(ServiceData("PAN Card Application", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.Work))
+                    ServiceItemCard(
+                        ServiceData(
+                            "Aadhar Card Update",
+                            "Update demographic or biometric details in your Aadhar card.",
+                            Icons.Outlined.PersonPin
+                        ),
+                        onClick = { navController.navigate("aadhar") }
+                    )
 
-                    ServiceItemCard(ServiceData("Driving License", "Apply for a new or renew your driving license.", Icons.Outlined.CarRental))
+                    ServiceItemCard(
+                        ServiceData(
+                            "PAN Card Application",
+                            "Apply for a new Permanent Account Number (PAN) card.",
+                            Icons.Outlined.Work
+                        ),
+                        onClick = { navController.navigate("pan") }
+                    )
 
-                    ServiceItemCard(ServiceData("Indian Passport", "Apply for a new Passport", Icons.Outlined.CarRental))
+                    ServiceItemCard(
+                        ServiceData(
+                            "Driving License",
+                            "Apply for a new or renew your driving license.",
+                            Icons.Outlined.CarRental
+                        ),
+                        onClick = { navController.navigate("dl") }
+                    )
 
-                    ServiceItemCard(ServiceData("Voter Id", "Apply for a new Voter Id ", Icons.Outlined.CarRental))
+                    ServiceItemCard(
+                        ServiceData(
+                            "Indian Passport",
+                            "Apply for a new Passport",
+                            Icons.Outlined.CarRental
+                        ),
+                        onClick = { navController.navigate("passport") }
+                    )
 
+                    ServiceItemCard(
+                        ServiceData(
+                            "Voter Id",
+                            "Apply for a new Voter Id ",
+                            Icons.Outlined.CarRental
+                        ),
+                        onClick = { navController.navigate("voter") }
+                    )
                 }
+
             }
 
             item {
@@ -201,8 +235,8 @@ fun ServicesScreen(navController: NavHostController) {
 
 
         }
-        }
     }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)

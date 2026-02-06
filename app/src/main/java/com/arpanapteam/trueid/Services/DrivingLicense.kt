@@ -26,7 +26,7 @@ data class DLService(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrivingLicenseScreen() {
+fun DrivingLicenseScreen(onBack: () -> Unit = {}) {
 
     val context = LocalContext.current
     val activity = context as? Activity
@@ -62,7 +62,7 @@ fun DrivingLicenseScreen() {
             TopAppBar(
                 title = { Text("Driving License") },
                 navigationIcon = {
-                    IconButton(onClick = { activity?.finish() }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack,null)
                     }
                 }
