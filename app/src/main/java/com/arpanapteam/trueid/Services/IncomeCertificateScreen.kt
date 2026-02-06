@@ -1,5 +1,7 @@
 package com.arpanapteam.trueid.Services
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,97 +10,149 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IncomeCertificateScreen(navController: NavController) {
+fun IncomeCertificateScreen(onBack: () -> Unit = {}) {
+
+    val context = LocalContext.current
+
+    fun open(url: String) {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    }
 
     Scaffold(
-        containerColor = OffWhite,
         topBar = {
             TopAppBar(
                 title = { Text("Income Certificate") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null)
                     }
                 }
             )
-        }
-    ) { padding ->
+        },
+        containerColor = OffWhite
+    ) { pad ->
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+                .padding(pad)
+                .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
+            // STEP 1
             item {
-                Step(1, "Register on Portal") {
-                    Text("Register yourself on the e-Sathi portal.")
-                }
+                StepCard(
+                    title = "Step 1: Register on Portal",
+                    desc = "If you are a new user, first register on e-Sathi portal.",
+                    buttonText = "GO",
+                    onClick = {
+                        open("https://esathi.up.gov.in/")
+                    }
+                )
             }
 
+            // STEP 2
             item {
-                Step(2, "Prepare Documents                         ") {
-                    Text("- Aadhaar Card")
-                    Text("- Income Proof")
-                    Text("- Family ID / Ration Card")
-                }
+                StepCard(
+                    title = "Step 2: Prepare Documents",
+                    desc =
+                        "• Applicant Photo\n" +
+                                "• Aadhaar Card\n" +
+                                "• Self-Declaration Form\n" +
+                                "• Ration Card / Family ID\n" +
+                                "• Salary Slip (if applicable)",
+                    buttonText = "Download Form",
+                    onClick = {
+                        open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
+                    }
+                )
             }
 
+            // STEP 3
             item {
-                Step(3, "Apply Online           ") {
-                    Text("Fill the form and upload documents.")
-                }
+                StepCard(
+                    title = "Step 3: Login & Apply",
+                    desc =
+                        "Login → Select Income Certificate → Fill form → Upload documents → Pay fee → Submit.",
+                    buttonText = "GO",
+                    onClick = {
+                        open("https://esathi.up.gov.in/")
+                    }
+                )
             }
 
+            // STEP 4
             item {
-                Step(4, "Track Status") {
-                    Text("Track application using application number.")
-                }
+                StepCard(
+                    title = "Step 4: Check Status",
+                    desc = "Track your application using application number.",
+                    buttonText = "Check Status",
+                    onClick = {
+                        open("https://esathi.up.gov.in/citizenservices/login/login.aspx")
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun Step(
-    stepNo: Int,
+fun StepCard(
     title: String,
-    content: @Composable () -> Unit
+    desc: String,
+    buttonText: String,
+    onClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+
             Text(
-                "Step $stepNo: $title",
+                title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 18.sp
             )
+
             Spacer(Modifier.height(8.dp))
-            content()
+
+            Text(
+                desc,
+                fontSize = 14.sp
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Indigo)
+            ) {
+                Text(buttonText)
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun IncomeCertificatePreview() {
+fun IncomePreview() {
     TRUEIDTheme {
-        IncomeCertificateScreen(rememberNavController())
+        IncomeCertificateScreen()
     }
 }

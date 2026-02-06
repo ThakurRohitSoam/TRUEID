@@ -1,6 +1,5 @@
-package com.arpanapteam.trueid.Services
+package com.arpanapteam.trueid
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -20,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import com.arpanapteam.trueid.ui.theme.Indigo
 
 // ---------- DATA ----------
 data class RailwayLink(
@@ -30,14 +30,15 @@ data class RailwayLink(
 // ---------- SCREEN ----------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RailwayLinksScreen() {
+fun RailwayLinksScreen(
+    onBack: () -> Unit = {}
+) {
 
     val context = LocalContext.current
-    val activity = context as? Activity
 
     val links = listOf(
         RailwayLink(
-            "Register New User (Create IRCTC ID)",
+            "Register New User",
             "https://www.irctc.co.in/nget/profile/user-signup"
         ),
         RailwayLink(
@@ -49,7 +50,7 @@ fun RailwayLinksScreen() {
             "https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?locale=en"
         ),
         RailwayLink(
-            "Open IRCTC Official App",
+            "IRCTC Official App",
             "https://play.google.com/store/apps/details?id=cris.org.in.prs.ima"
         )
     )
@@ -61,8 +62,8 @@ fun RailwayLinksScreen() {
 
                 // ✅ BACK BUTTON ADDED
                 navigationIcon = {
-                    IconButton(onClick = { activity?.finish() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null)
                     }
                 }
             )
@@ -83,7 +84,7 @@ fun RailwayLinksScreen() {
 
                 RailwayRow(
                     title = item.title,
-                    onClick = {
+                    onGoClick = {
                         val intent = Intent(
                             Intent.ACTION_VIEW,
                             Uri.parse(item.url)
@@ -100,14 +101,13 @@ fun RailwayLinksScreen() {
 @Composable
 fun RailwayRow(
     title: String,
-    onClick: () -> Unit
+    onGoClick: () -> Unit
 ) {
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .clickable { onClick() },
+            .height(80.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -116,21 +116,35 @@ fun RailwayRow(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 18.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Icon(
-                imageVector = Icons.Outlined.Train,
-                contentDescription = null
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            Spacer(Modifier.width(16.dp))
+                Icon(
+                    imageVector = Icons.Outlined.Train,
+                    contentDescription = null
+                )
 
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // ✅ GO BUTTON ADDED
+            Button(
+                onClick = onGoClick,
+                colors = ButtonDefaults.buttonColors(Indigo)
+            ) {
+                Text("GO")
+            }
         }
     }
 }

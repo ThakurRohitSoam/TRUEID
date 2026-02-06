@@ -6,13 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Home
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,25 +23,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.*
+
 import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
-import com.arpanapteam.trueid.Services.BusTicketScreen
-import com.arpanapteam.trueid.Services.IncomeCertificateScreen
-import com.arpanapteam.trueid.Services.RailwayLinksScreen
-import com.arpanapteam.trueid.Services.ServicesScreen
-import com.arpanapteam.trueid.ui.theme.Indigo
-import com.arpanapteam.trueid.ui.theme.OffWhite
-import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
+import com.arpanapteam.trueid.Services.*
+import com.arpanapteam.trueid.ui.theme.*
+
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Edge to edge
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
 
@@ -47,53 +48,51 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
 
-            // 🔥 Read theme from DataStore
             val themeFlow = remember { ThemePreference.themeFlow(context) }
             val isDarkTheme by themeFlow.collectAsState(initial = false)
 
-            // Status bar icon color according to theme
             SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView)
                     .isAppearanceLightStatusBars = !isDarkTheme
             }
 
-            TRUEIDTheme(content = {
+            TRUEIDTheme {
                 MainAppUI(
-                    isDarkTheme = isDarkTheme,
-                    onToggleTheme = { newValue ->
+                    isDarkTheme,
+                    onToggleTheme = {
                         scope.launch {
-                            ThemePreference.saveTheme(context, newValue)
+                            ThemePreference.saveTheme(context, it)
                         }
                     }
                 )
-            })
+            }
         }
     }
 }
 
-// Isolated UI function
 @Composable
 fun MainAppUI(
     isDarkTheme: Boolean,
     onToggleTheme: (Boolean) -> Unit
 ) {
-
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     val openDrawer: () -> Unit = {
-        scope.launch { drawerState.open() }
+        scope.launch {
+            drawerState.open()
+        }
     }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
-                navController = navController,
-                onClose = { scope.launch { drawerState.close() } },
-                isDarkTheme = isDarkTheme,
-                onToggleTheme = onToggleTheme
+                navController,
+                { scope.launch { drawerState.close() } },
+                isDarkTheme,
+                onToggleTheme
             )
         }
     ) {
@@ -101,16 +100,16 @@ fun MainAppUI(
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = { TrueIdBottomBar(navController) }
-        ) { innerPadding ->
+        ) { padding ->
 
             NavHost(
-                navController = navController,
+                navController,
                 startDestination = "home",
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(padding)
             ) {
 
                 composable("home") {
-                    TrueIdHomeScreen(openDrawer = openDrawer)
+                    TrueIdHomeScreen(openDrawer)
                 }
 
                 composable("services") {
@@ -118,7 +117,34 @@ fun MainAppUI(
                 }
 
                 composable("income_certificate") {
-                    IncomeCertificateScreen(navController)
+                    IncomeCertificateScreen(navController as () -> Unit)
+                }
+
+                composable("railway") {
+                    RailwayLinksScreen()
+                }
+
+                composable("flight") {
+                    AirlineTicketScreen { navController.popBackStack() }
+                }
+
+                composable("metro") {
+                    MetroTicketScreen { navController.popBackStack() }
+                }
+
+                composable("bus") {
+                    BusTicketScreen { navController.popBackStack() }
+                }
+
+                composable("feedback") {
+                    MultiStepFeedbackScreen(
+                        { navController.popBackStack() },
+                        { navController.popBackStack() }
+                    )
+                }
+
+                composable("news") {
+                    NewsScreen(navController)
                 }
 
                 composable("about") {
@@ -128,38 +154,6 @@ fun MainAppUI(
                 composable("terms") {
                     TermsAndConditionsScreen(navController)
                 }
-
-                composable("news") {
-                    NewsScreen(navController)
-                }
-
-                composable("news_detail/{newsId}") { backStackEntry ->
-                    val id = backStackEntry.arguments?.getString("newsId")?.toIntOrNull() ?: -1
-                    NewsDetailScreen(
-                        newsId = id,
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-
-
-                composable("contact") {
-                    ContactUsScreen { navController.popBackStack() }
-                }
-
-                composable("feedback") {
-                    MultiStepFeedbackScreen(
-                        onBack = { navController.popBackStack() },
-                        onSubmit = { navController.popBackStack() }
-                    )
-                }
-                composable("railway") { RailwayLinksScreen() }
-
-                composable("flight") { AirlineTicketScreen { navController.popBackStack() } }
-
-                composable("metro") { MetroTicketScreen { navController.popBackStack() } }
-
-                composable("bus") { BusTicketScreen { navController.popBackStack() } }
-
             }
         }
     }
@@ -175,28 +169,28 @@ fun TrueIdBottomBar(navController: NavController) {
         BottomNavItem("Feedback", Icons.Outlined.Feedback, "feedback")
     )
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val backStack by navController.currentBackStackEntryAsState()
+    val current = backStack?.destination
 
     NavigationBar(containerColor = Color.White) {
 
         items.forEach { item ->
             NavigationBarItem(
-                selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
                         launchSingleTop = true
                         restoreState = true
                     }
                 },
                 label = { Text(item.label, fontSize = 12.sp) },
-                icon = { Icon(item.icon, contentDescription = item.label) },
+                icon = { Icon(item.icon, item.label) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Indigo,
                     selectedTextColor = Indigo,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
                     indicatorColor = OffWhite
                 )
             )
@@ -204,4 +198,8 @@ fun TrueIdBottomBar(navController: NavController) {
     }
 }
 
-data class BottomNavItem(val label: String, val icon: ImageVector, val route: String)
+data class BottomNavItem(
+    val label: String,
+    val icon: ImageVector,
+    val route: String
+)
