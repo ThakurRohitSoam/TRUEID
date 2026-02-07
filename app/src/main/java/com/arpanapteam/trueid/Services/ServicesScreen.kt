@@ -81,7 +81,7 @@ fun ServicesScreen(navController: NavHostController) {
                         ServiceData(
                             "PAN Card Application",
                             "Apply for a new Permanent Account Number (PAN) card.",
-                            Icons.Outlined.Work
+                            Icons.Outlined.WorkOutline
                         ),
                         onClick = { navController.navigate("pan") }
                     )
@@ -90,7 +90,7 @@ fun ServicesScreen(navController: NavHostController) {
                         ServiceData(
                             "Driving License",
                             "Apply for a new or renew your driving license.",
-                            Icons.Outlined.CarRental
+                            Icons.Outlined.Badge
                         ),
                         onClick = { navController.navigate("dl") }
                     )
@@ -99,7 +99,7 @@ fun ServicesScreen(navController: NavHostController) {
                         ServiceData(
                             "Indian Passport",
                             "Apply for a new Passport",
-                            Icons.Outlined.CarRental
+                            Icons.Outlined.Work
                         ),
                         onClick = { navController.navigate("passport") }
                     )
@@ -108,7 +108,7 @@ fun ServicesScreen(navController: NavHostController) {
                         ServiceData(
                             "Voter Id",
                             "Apply for a new Voter Id ",
-                            Icons.Outlined.CarRental
+                            Icons.Outlined.HowToVote
                         ),
                         onClick = { navController.navigate("voter") }
                     )
@@ -118,89 +118,109 @@ fun ServicesScreen(navController: NavHostController) {
 
             item {
                 ServiceCategorySection(title = "E-District Services") {
-                    ServiceItemCard(ServiceData("Income Certificate", "Apply for new income certificate.", Icons.Outlined.Description),onClick = {
-                        navController.navigate("income_certificate")
-                    })
 
-                    ServiceItemCard(ServiceData("Domicile Certificate", "Obtain a certificate of residency in Uttar Pradesh.", Icons.Outlined.Home))
+                    ServiceItemCard(
+                        ServiceData("Income Certificate","Apply for new income certificate.",Icons.Outlined.Description)
+                    ) { navController.navigate("income_certificate") }
 
-                    ServiceItemCard(ServiceData("Caste Certificate", "Apply for your caste certificate for government benefits.", Icons.Outlined.VerifiedUser))
+                    ServiceItemCard(
+                        ServiceData("Domicile Certificate","Obtain a certificate of residency.",Icons.Outlined.Home)
+                    ) { navController.navigate("domicile") }
 
-                    ServiceItemCard(ServiceData("Ration Card", "Apply for New Ration Card", Icons.Outlined.VerifiedUser))
+                    ServiceItemCard(
+                        ServiceData("Caste Certificate","Apply for caste certificate.",Icons.Outlined.VerifiedUser)
+                    ) { navController.navigate("caste") }
 
-                    ServiceItemCard(ServiceData("Family Id", "Get your Family Id by simple steps.", Icons.Outlined.VerifiedUser))
+                    ServiceItemCard(
+                        ServiceData("Ration Card","Apply for New Ration Card",Icons.Outlined.VerifiedUser)
+                    ) { navController.navigate("ration") }
 
+                    ServiceItemCard(
+                        ServiceData("Family Id","Get your Family Id.",Icons.Outlined.VerifiedUser)
+                    ) { navController.navigate("family") }
                 }
             }
 
             item {
                 ServiceCategorySection(title = "Government Schemes") {
 
-                    ServiceItemCard(ServiceData("PM-Kisaan Samman Nidhi Yojna", "Get a benefit of 6000 rupees annually Under Pm Kisaan Samman Nidhi ", Icons.Outlined.HomeWork))
+                    ServiceItemCard(
+                        ServiceData("PM-Kisan","₹6000 benefit yearly",Icons.Outlined.HomeWork)
+                    ) { navController.navigate("pmkisan") }
 
-                    ServiceItemCard(ServiceData("Pradhan Mantri Kaushal Vikash Yojna", "Information and application for state university admissions.",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
-                    ServiceItemCard(ServiceData("UP Pension Schemes", "Information and application for state university admissions.",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
+                    ServiceItemCard(
+                        ServiceData("PMKVY","Skill training scheme",Icons.AutoMirrored.Outlined.Assignment)
+                    ) { navController.navigate("pmkvy") }
+
+                    ServiceItemCard(
+                        ServiceData("UP Pension","Pension schemes",Icons.AutoMirrored.Outlined.Assignment)
+                    ) { navController.navigate("uppension") }
                 }
-
             }
 
             item {
                 ServiceCategorySection(title = "Scholarship") {
-                    ServiceItemCard(ServiceData("UP Scholarship", "Apply for Scholarship program in Uttar Pradesh.", Icons.Outlined.School))
-                    ServiceItemCard(ServiceData("National Scholarship", "Apply for National Scholarship by Central Government", Icons.Outlined.HomeWork))
-                    ServiceItemCard(ServiceData("Saksham Scholarship", "Apply for Saksham Scholarship program ",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
-                }
 
+                    ServiceItemCard(
+                        ServiceData("UP Scholarship","UP Scholarship portal",Icons.Outlined.School)
+                    ) { navController.navigate("upscholarship") }
+
+                    ServiceItemCard(
+                        ServiceData("National Scholarship","Central Govt scholarship",Icons.Outlined.HomeWork)
+                    ) { navController.navigate("nsp") }
+
+                    ServiceItemCard(
+                        ServiceData("Saksham Scholarship","AICTE scheme",Icons.AutoMirrored.Outlined.Assignment)
+                    ) { navController.navigate("saksham") }
+                }
             }
 
             item {
                 ServiceCategorySection(title = "Education Board & Universities") {
 
-                    ServiceItemCard(ServiceData("UP Board", "Check your Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
+                    ServiceItemCard(ServiceData("UP Board","UPMSP",Icons.AutoMirrored.Outlined.Assignment)) {
+                        navController.navigate("upboard")
+                    }
 
-                    ServiceItemCard(ServiceData("CBSE Board", "Check your Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
-                    ServiceItemCard(ServiceData("UP Board of Technical Education", "Check your Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
+                    ServiceItemCard(ServiceData("CBSE","CBSE Board",Icons.AutoMirrored.Outlined.Assignment)) {
+                        navController.navigate("cbse")
+                    }
 
-                    ServiceItemCard(ServiceData("ICSE Board", "Check your Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
-                    ServiceItemCard(ServiceData("AKTU", "Check your Student Profile Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.LibraryBooks
-                    ))
-                    ServiceItemCard(ServiceData("CCSU", "Check your Results and Course Curriculum",
-                        Icons.AutoMirrored.Outlined.MenuBook
-                    ))
+                    ServiceItemCard(ServiceData("BTEUP","Technical Board",Icons.AutoMirrored.Outlined.Assignment)) {
+                        navController.navigate("bteup")
+                    }
+
+                    ServiceItemCard(ServiceData("ICSE","CISCE Board",Icons.AutoMirrored.Outlined.Assignment)) {
+                        navController.navigate("cisce")
+                    }
+
+                    ServiceItemCard(ServiceData("AKTU","University",Icons.AutoMirrored.Outlined.LibraryBooks)) {
+                        navController.navigate("aktu")
+                    }
+
+                    ServiceItemCard(ServiceData("CCSU","University",Icons.AutoMirrored.Outlined.MenuBook)) {
+                        navController.navigate("ccsu")
+                    }
                 }
-
             }
 
 
             item {
                 ServiceCategorySection(title = "Property and Land Records") {
 
-                    ServiceItemCard(ServiceData("UP Bhulekh", "View your Khasra Khatauni online ", Icons.Outlined.DocumentScanner))
+                    ServiceItemCard(ServiceData("UP Bhulekh","Land records",Icons.Outlined.DocumentScanner)) {
+                        navController.navigate("bhulekh")
+                    }
 
-                    ServiceItemCard(ServiceData("Property Registration", "Register property deeds and obtain land records.", Icons.Outlined.PendingActions))
+                    ServiceItemCard(ServiceData("Property Registration","Register property",Icons.Outlined.PendingActions)) {
+                        navController.navigate("property_registration")
+                    }
 
-                    ServiceItemCard(ServiceData("Property Maps", "View property maps and obtain land records",
-                        Icons.AutoMirrored.Outlined.Assignment
-                    ))
+                    ServiceItemCard(ServiceData("Property Maps","Geo maps",Icons.AutoMirrored.Outlined.Assignment)) {
+                        navController.navigate("property_maps")
+                    }
                 }
-
             }
-
             // Travel & Ticket Bookings section ONLY updated
 
             item {

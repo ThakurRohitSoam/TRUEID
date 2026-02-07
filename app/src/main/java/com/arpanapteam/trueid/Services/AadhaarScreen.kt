@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arpanapteam.trueid.MetroTicketScreen
 import com.arpanapteam.trueid.ui.theme.*
 
 data class AadhaarLink(
@@ -85,11 +84,11 @@ It is a 12-digit unique identification number for residents of India, issued by 
 
 Key Features:
 
-• Proof of ID: Valid identity & address proof nationwide  
-• Biometrics: Fingerprint & iris based (no duplicates)  
-• Essential Uses: Bank, SIM, taxes etc  
-• Government Benefits: Subsidies directly in bank  
-• Valid Formats: Physical & e-Aadhaar both valid  
+• Proof of ID: Valid identity & address proof nationwide 
+• Biometrics: Fingerprint & iris based (no duplicates) 
+• Essential Uses: Bank, SIM, taxes etc 
+• Government Benefits: Subsidies directly in bank 
+• Valid Formats: Physical & e-Aadhaar both valid 
 • Free for All: Enrollment is free for everyone
 """.trimIndent(),
                             fontSize = 14.sp
@@ -98,15 +97,13 @@ Key Features:
                 }
             }
 
-            // 🔹 Service Cards
+            // 🔹 Service Cards with GO Button
             items(links.size) { i ->
 
                 val item = links[i]
 
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { open(item.url) },
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
@@ -118,16 +115,29 @@ Key Features:
                             fontSize = 16.sp
                         )
 
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                        Text(
-                            "Click to open",
-                            color = Indigo,
-                            fontSize = 14.sp
-                        )
+                        Button(
+                            onClick = { open(item.url) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Indigo
+                            )
+                        ) {
+                            Text("GO")
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun AadhaarPreview() {
+    TRUEIDTheme {
+        AadhaarServicesScreen()
     }
 }

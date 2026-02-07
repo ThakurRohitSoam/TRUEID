@@ -175,6 +175,34 @@ fun MainAppUI(
                         navController.popBackStack()
                     }
                 }
+                // E-District
+                composable("domicile") { DomicileCertificateScreen { navController.popBackStack() } }
+                composable("caste") { CasteCertificateScreen { navController.popBackStack() } }
+                composable("ration") { RationCardScreen { navController.popBackStack() } }
+                composable("family") { FamilyIdScreen { navController.popBackStack() } }
+
+// Schemes
+                composable("pmkisan") { PMKisanScreen { navController.popBackStack() } }
+                composable("pmkvy") { PMKVYScreen { navController.popBackStack() } }
+                composable("uppension") { UPPensionScreen { navController.popBackStack() } }
+
+// Scholarship
+                composable("upscholarship") { ScholarshipScreen { navController.popBackStack() } }
+                composable("nsp") { NSPScreen { navController.popBackStack() } }
+                composable("saksham") { SakshamScholarshipScreen { navController.popBackStack() } }
+
+// Boards
+                composable("upboard") { UPBoardScreen { navController.popBackStack() } }
+                composable("cbse") { CbseScreen { navController.popBackStack() } }
+                composable("bteup") { BteupScreen { navController.popBackStack() } }
+                composable("cisce") { CisceScreen { navController.popBackStack() } }
+                composable("aktu") { AktuScreen { navController.popBackStack() } }
+                composable("ccsu") { CcsuScreen { navController.popBackStack() } }
+
+// Property
+                composable("bhulekh") { BhulekhScreen { navController.popBackStack() } }
+                composable("property_registration") { PropertyRegistrationScreen { navController.popBackStack() } }
+                composable("property_maps") { PropertyMapsScreen { navController.popBackStack() } }
             }
         }
     }
