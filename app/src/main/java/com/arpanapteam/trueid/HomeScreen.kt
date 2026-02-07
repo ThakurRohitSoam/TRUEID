@@ -22,17 +22,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.*
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrueIdHomeScreen(openDrawer: () -> Unit) {
+fun TrueIdHomeScreen(
+    openDrawer: () -> Unit,
+    navController: NavHostController
+) {
 
     Scaffold(
         containerColor = OffWhite,
         topBar = {
-            TrueIdTopAppBar(
-                onMenuClick = openDrawer
-            )
+            TrueIdTopAppBar(onMenuClick = openDrawer)
         }
     ) { paddingValues ->
 
@@ -43,38 +46,42 @@ fun TrueIdHomeScreen(openDrawer: () -> Unit) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+
             item { HeroCard() }
 
             item {
                 ServiceCategoryCard(
-                    title = "Important Documents",
-                    items = listOf(
-                        ServiceItem("Aadhar Card", Icons.Outlined.QrCodeScanner),
-                        ServiceItem("PAN Card", Icons.Outlined.CreditCard),
-                        ServiceItem("Indian Passport", Icons.Outlined.Book)
-                    )
+                    "Important Documents",
+                    listOf(
+                        ServiceItem("Aadhar Card", Icons.Outlined.QrCodeScanner,"aadhar"),
+                        ServiceItem("PAN Card", Icons.Outlined.CreditCard,"pan"),
+                        ServiceItem("Indian Passport", Icons.Outlined.Book,"passport")
+                    ),
+                    navController
                 )
             }
 
             item {
                 ServiceCategoryCard(
-                    title = "Uttar Pradesh E-District Services",
-                    items = listOf(
-                        ServiceItem("Income Certificate", Icons.AutoMirrored.Outlined.ReceiptLong),
-                        ServiceItem("Domicile Certificate", Icons.Outlined.HomeWork),
-                        ServiceItem("Caste Certificate", Icons.Outlined.Groups)
-                    )
+                    "Uttar Pradesh E-District Services",
+                    listOf(
+                        ServiceItem("Income Certificate", Icons.AutoMirrored.Outlined.ReceiptLong,"income_certificate"),
+                        ServiceItem("Domicile Certificate", Icons.Outlined.HomeWork,"domicile"),
+                        ServiceItem("Caste Certificate", Icons.Outlined.Groups,"caste")
+                    ),
+                    navController
                 )
             }
 
             item {
                 ServiceCategoryCard(
-                    title = "Ticket Booking",
-                    items = listOf(
-                        ServiceItem("Indian Railway", Icons.Outlined.Train),
-                        ServiceItem("Flight Booking", Icons.Outlined.Flight),
-                        ServiceItem("Metro Services", Icons.Outlined.Tram)
-                    )
+                    "Ticket Booking",
+                    listOf(
+                        ServiceItem("Indian Railway", Icons.Outlined.Train,"railway"),
+                        ServiceItem("Flight Booking", Icons.Outlined.Flight,"flight"),
+                        ServiceItem("Metro Services", Icons.Outlined.Tram,"metro")
+                    ),
+                    navController
                 )
             }
         }
@@ -87,42 +94,31 @@ fun TrueIdTopAppBar(onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.VerifiedUser,
-                    contentDescription = "App Logo",
-                    tint = Indigo
-                )
+                Icon(Icons.Outlined.VerifiedUser,null,tint = Indigo)
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "TRUEID",
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                Text("TRUEID", fontWeight = FontWeight.Bold)
             }
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+                Icon(Icons.Default.Menu,null)
             }
         },
         actions = {
             IconButton(onClick = {}) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                Icon(Icons.Default.Search,null)
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        )
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
 }
 
 @Composable
 fun HeroCard() {
-    val gradient = Brush.linearGradient(
-        colors = listOf(PinkishPurple, LightPurple)
-    )
+    val gradient = Brush.linearGradient(listOf(PinkishPurple, LightPurple))
+
     Box(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .height(180.dp)
             .clip(RoundedCornerShape(20.dp))
@@ -132,54 +128,52 @@ fun HeroCard() {
     ) {
         Column {
             Text(
-                text = "Trusted Reliable Unified E-Governance Interface for Data",
+                "Trusted Reliable Unified E-Governance Interface for Data",
                 color = Color.White,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 28.sp
+                fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Your one-stop portal for all government services in Uttar Pradesh",
-                color = Color.White.copy(alpha = 0.9f),
-                fontSize = 14.sp
+                "Your one-stop portal for all government services in Uttar Pradesh",
+                color = Color.White.copy(.9f)
             )
         }
     }
 }
 
-data class ServiceItem(val name: String, val icon: ImageVector)
+data class ServiceItem(
+    val name: String,
+    val icon: ImageVector,
+    val route: String
+)
 
 @Composable
-fun ServiceCategoryCard(title: String, items: List<ServiceItem>) {
+fun ServiceCategoryCard(
+    title: String,
+    items: List<ServiceItem>,
+    navController: NavHostController
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column {
+
             Box(
-                modifier = Modifier
+                Modifier
                     .fillMaxWidth()
-                    .background(
-                        color = Indigo,
-                        shape = RoundedCornerShape(topStart =
-                            16.dp, topEnd = 16.dp)
-                    )
+                    .background(Indigo, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     .padding(16.dp)
             ) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(title, color = Color.White, fontWeight = FontWeight.Bold)
             }
 
-            Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                items.forEach { item ->
-                    ServiceItemRow(item = item)
+            Column(Modifier.padding(vertical = 8.dp)) {
+                items.forEach {
+                    ServiceItemRow(it, navController)
                 }
             }
         }
@@ -187,31 +181,58 @@ fun ServiceCategoryCard(title: String, items: List<ServiceItem>) {
 }
 
 @Composable
-fun ServiceItemRow(item: ServiceItem) {
+fun ServiceItemRow(
+    item: ServiceItem,
+    navController: NavHostController
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp), // less vertical gap
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         Icon(
-            imageVector = item.icon,
-            contentDescription = item.name,
-            tint = Indigo
+            item.icon,
+            contentDescription = null,
+            tint = Indigo,
+            modifier = Modifier.size(22.dp)
         )
-        Spacer(Modifier.width(16.dp))
+
+        Spacer(Modifier.width(14.dp))
+
         Text(
             text = item.name,
+            modifier = Modifier.weight(1f),
             color = TextGray,
             fontSize = 15.sp
         )
+
+        Button(
+            onClick = { navController.navigate(item.route) },
+            contentPadding = PaddingValues(
+                horizontal = 14.dp,
+                vertical = 2.dp
+            ),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Indigo),
+            elevation = ButtonDefaults.buttonElevation(2.dp)
+        ) {
+            Text(
+                "GO",
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun TrueIdHomeScreenPreview() {
-    TRUEIDTheme(content = {   //  REQUIRED
-        TrueIdHomeScreen(openDrawer = {})
-    })
+    TRUEIDTheme {
+        TrueIdHomeScreen(
+            openDrawer = {},
+            navController = rememberNavController()
+        )
+    }
 }

@@ -107,7 +107,12 @@ fun MainAppUI(
                 modifier = Modifier.padding(padding)
             ) {
 
-                composable("home") { TrueIdHomeScreen(openDrawer) }
+                composable("home") {
+                    TrueIdHomeScreen(
+                        openDrawer = openDrawer,
+                        navController = navController
+                    )
+                }
 
                 composable("services") {
                     ServicesScreen(navController)
@@ -252,3 +257,4 @@ data class BottomNavItem(
     val icon: ImageVector,
     val route: String
 )
+

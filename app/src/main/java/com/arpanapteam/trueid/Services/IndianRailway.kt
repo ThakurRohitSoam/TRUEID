@@ -2,7 +2,7 @@ package com.arpanapteam.trueid
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.clickable
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,9 +30,13 @@ data class RailwayLink(
 // ---------- SCREEN ----------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RailwayLinksScreen(onBack: () -> Unit = {}) {
+fun RailwayLinksScreen() {
 
     val context = LocalContext.current
+
+    // ✅ SYSTEM BACK FIX
+    val backDispatcher =
+        LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     val links = listOf(
         RailwayLink(
@@ -58,9 +62,11 @@ fun RailwayLinksScreen(onBack: () -> Unit = {}) {
             TopAppBar(
                 title = { Text("Railway Services") },
 
-                // ✅ BACK BUTTON ADDED
+                // ✅ WORKING BACK BUTTON
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        backDispatcher?.onBackPressed()
+                    }) {
                         Icon(Icons.Default.ArrowBack, null)
                     }
                 }
@@ -83,10 +89,8 @@ fun RailwayLinksScreen(onBack: () -> Unit = {}) {
                 RailwayRow(
                     title = item.title,
                     onGoClick = {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(item.url)
-                        )
+                        val intent =
+                            Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
                         context.startActivity(intent)
                     }
                 )
@@ -118,9 +122,7 @@ fun RailwayRow(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Icon(
                     imageVector = Icons.Outlined.Train,
@@ -136,7 +138,6 @@ fun RailwayRow(
                 )
             }
 
-            // ✅ GO BUTTON ADDED
             Button(
                 onClick = onGoClick,
                 colors = ButtonDefaults.buttonColors(Indigo)
