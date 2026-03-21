@@ -80,12 +80,28 @@ fun MainAppUI(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // 🟢 CURRENT ROUTE CHECKER
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // 1. Drawer Sirf 'home' screen pe slide hoke khulega
+    val isDrawerGestureEnabled = currentRoute == "home"
+
+    // 2. Admin routes ki list (jahan bottom bar hide karna hai)
+    val adminRoutes = listOf(
+        "admin_login", "admin_dashboard", "manage_services",
+        "manage_news", "view_feedback", "manage_service_links",
+        "manage_service_info", "manage_home_services"
+    )
+    val showBottomBar = currentRoute !in adminRoutes
+
     val openDrawer: () -> Unit = {
         scope.launch { drawerState.open() }
     }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = isDrawerGestureEnabled, // ✅ DRAWER FIX APPLIED
         drawerContent = {
             AppDrawer(
                 navController,
@@ -97,7 +113,12 @@ fun MainAppUI(
     ) {
         Scaffold(
             contentWindowInsets = WindowInsets(0,0,0,0),
-            bottomBar = { TrueIdBottomBar(navController) }
+            bottomBar = {
+                // ✅ ADMIN PANEL LOCK (Bottom bar tabhi dikhega jab admin panel mein na ho)
+                if (showBottomBar) {
+                    TrueIdBottomBar(navController)
+                }
+            }
         ) { padding ->
 
             NavHost(
@@ -128,10 +149,12 @@ fun MainAppUI(
                 composable("manage_services") { ManageServicesScreen(navController) }
                 composable("manage_news") { ManageNewsScreen(navController) }
                 composable("view_feedback") { ViewFeedbackScreen(navController) }
-                composable("manage_service_links") { ManageServiceLinksScreen(navController) } // NAYA ADMIN PAGE
+                composable("manage_service_links") { ManageServiceLinksScreen(navController) }
+                composable("manage_service_info") { ManageServiceInfoScreen(navController) }
+                composable("manage_home_services") { ManageHomeServicesScreen(navController) }
 
                 // ==========================================
-                // 🚀 DYNAMIC SERVICES ROUTING (THE MAGIC PART)
+                // 🚀 DYNAMIC SERVICES ROUTING
                 // ==========================================
 
                 // Documents
@@ -172,7 +195,19 @@ fun MainAppUI(
                 composable("flight") { DynamicServiceScreen(navController, "flight", "Flight Booking") }
                 composable("metro") { DynamicServiceScreen(navController, "metro", "Metro Services") }
                 composable("bus") { DynamicServiceScreen(navController, "bus", "Bus Ticket Booking") }
-                composable("manage_service_info") { ManageServiceInfoScreen(navController) }
+
+                // 🚀 THE MASTER ROUTE FOR NEW DYNAMIC SERVICES
+                composable(
+                    route = "dynamic_service/{serviceKey}/{title}",
+                    arguments = listOf(
+                        navArgument("serviceKey") { type = NavType.StringType },
+                        navArgument("title") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val serviceKey = backStackEntry.arguments?.getString("serviceKey") ?: ""
+                    val title = backStackEntry.arguments?.getString("title") ?: "Service"
+                    DynamicServiceScreen(navController, serviceKey, title)
+                }
             }
         }
     }

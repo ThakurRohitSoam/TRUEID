@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState // 🟢 Scroll ke liye import kiya
+import androidx.compose.foundation.verticalScroll // 🟢 Scroll ke liye import kiya
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.arpanapteam.trueid.ui.theme.Indigo
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -31,15 +34,19 @@ import io.github.jan.supabase.postgrest.postgrest
 // 🔴 IMPORTANT: PUT YOUR SUPABASE DETAILS HERE
 // ==========================================
 val supabase = createSupabaseClient(
-    supabaseUrl = "https://iwlzrddbihvvzxhghgrt.supabase.co", // <-- Apna poora URL (.supabase.co ke sath) yahan daalein
-    supabaseKey = "sb_publishable_PseXbACWYTS-Z8HrvAuflg_-AEFPHCR" // <-- Apni poori key yahan daalein
+    supabaseUrl = "https://iwlzrddbihvvzxhghgrt.supabase.co", // <-- Apna poora URL yahan daalein
+    supabaseKey = "sb_publishable_PseXbACWYTS-Z8HrvAuflg_-AEFPHCR"    // <-- Apni poori key yahan daalein
 ) {
     install(Postgrest)
 }
 
 // --- DATA MODELS ---
 @Serializable
-data class AdminServiceModel(val id: Int? = null, val title: String, val description: String, val introduction: String, val cost: String, val link_url: String, val created_at: String? = null)
+data class AdminServiceModel(val id: Int? = null, val title: String, val description: String, val category: String? = null, val service_key: String, val created_at: String? = null)
+
+// 🆕 Naya model Home Screen ke liye
+@Serializable
+data class AdminHomeServiceModel(val id: Int? = null, val title: String, val category: String? = null, val service_key: String, val created_at: String? = null)
 
 @Serializable
 data class AdminNewsModel(val id: Int? = null, val tag: String, val date: String, val title: String, val short_content: String, val full_content: String, val image_url: String, val created_at: String? = null)
@@ -53,7 +60,6 @@ data class ServiceLinkModel(val id: Int? = null, val service_key: String, val bu
 @Serializable
 data class ServiceInfoModel(val id: Int? = null, val service_key: String, val heading: String, val details: String, val created_at: String? = null)
 
-
 // --- 1. ADMIN LOGIN SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +71,15 @@ fun AdminLoginScreen(navController: NavController) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Admin Access") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "Back") } }) }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()), // 🟢 Scroll fix added
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text("Admin Login", fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(24.dp))
             OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
@@ -94,13 +108,22 @@ fun AdminDashboardScreen(navController: NavController) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Admin Dashboard") }, navigationIcon = { IconButton(onClick = { navController.navigate("home") { popUpTo(0) } }) { Icon(Icons.Default.ArrowBack, "Logout") } }) }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            AdminMenuCard("Manage Services", "Add or remove app services") { navController.navigate("manage_services") }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()), // 🟢 Scroll fix added
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 🆕 Naya button Home Services ke liye
+            AdminMenuCard("Manage Home Services", "Add special cards ONLY for Home Screen") { navController.navigate("manage_home_services") }
+            AdminMenuCard("Manage Services", "Create Category & Add App Service Cards") { navController.navigate("manage_services") }
             AdminMenuCard("Manage News", "Post or delete news alerts") { navController.navigate("manage_news") }
+            AdminMenuCard("Manage Inside Links", "Add inside buttons/links for inside pages.") { navController.navigate("manage_service_links") }
+            AdminMenuCard("Manage Intro Info", "Add Introduction inside the page (e.g., What is Aadhaar?)") { navController.navigate("manage_service_info") }
             AdminMenuCard("View Feedback", "Read user feedback") { navController.navigate("view_feedback") }
-            AdminMenuCard("Manage Inside Links", "Add inside buttons/links for Aadhar, PAN, etc.") { navController.navigate("manage_service_links") }
-            // ✅ NAYA BUTTON ADD KIYA
-            AdminMenuCard("Manage Intro Info", "Add Introduction (e.g., What is Aadhaar?)") { navController.navigate("manage_service_info") }
+            Spacer(Modifier.height(16.dp)) // Extra space at bottom
         }
     }
 }
@@ -116,44 +139,51 @@ fun AdminMenuCard(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
-// --- 3. MANAGE SERVICES SCREEN ---
+// --- 3. MANAGE SERVICES SCREEN (For Services Tab) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageServicesScreen(navController: NavController) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var intro by remember { mutableStateOf("") }
-    var cost by remember { mutableStateOf("") }
-    var link by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+    var serviceKeyInput by remember { mutableStateOf("") }
+
     var servicesList by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) { try { servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() } catch (e: Exception) {} }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Manage Services") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text("Create Service Card") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
         LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
             item {
-                Text("Add New Service", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = intro, onValueChange = { intro = it }, label = { Text("Introduction") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = cost, onValueChange = { cost = it }, label = { Text("Cost") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = link, onValueChange = { link = it }, label = { Text("Link URL") }, modifier = Modifier.fillMaxWidth())
+                Text("Add New Service Card", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Card Title (e.g. Health Card)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Card Description") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = category, onValueChange = { category = it }, label = { Text("Category (e.g. Medical Services)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = serviceKeyInput, onValueChange = { serviceKeyInput = it }, label = { Text("Service Key (e.g. health_card)") }, modifier = Modifier.fillMaxWidth())
+
+                Spacer(Modifier.height(16.dp))
                 Button(onClick = {
                     scope.launch {
                         try {
-                            val newService = AdminServiceModel(title = title, description = description, introduction = intro, cost = cost, link_url = link)
+                            val newService = AdminServiceModel(
+                                title = title,
+                                description = description,
+                                category = category.ifEmpty { "New Updates" },
+                                service_key = serviceKeyInput
+                            )
                             supabase.postgrest["services"].insert(newService)
                             servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>()
-                            title = ""; description = ""; intro = ""; cost = ""; link = ""
-                            Toast.makeText(context, "Service Added Successfully!", Toast.LENGTH_SHORT).show()
+                            title = ""; description = ""; category = ""; serviceKeyInput = ""
+                            Toast.makeText(context, "Card Created Successfully!", Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) { Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
                     }
-                }, modifier = Modifier.fillMaxWidth()) { Text("Add Service") }
+                }, modifier = Modifier.fillMaxWidth()) { Text("Add Card to App") }
                 Spacer(Modifier.height(24.dp))
-                Text("Existing Services", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("Existing Cards", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(8.dp))
             }
 
@@ -162,11 +192,71 @@ fun ManageServicesScreen(navController: NavController) {
                     Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(service.title, fontWeight = FontWeight.Bold)
-                            Text(service.cost, color = Color.Gray, fontSize = 12.sp)
+                            Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 12.sp)
+                            Text("Key: ${service.service_key}", color = Indigo, fontSize = 12.sp)
                         }
                         IconButton(onClick = {
                             scope.launch {
                                 try { service.id?.let { id -> supabase.postgrest["services"].delete { filter { eq("id", id) } }; servicesList = servicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                            }
+                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 🆕 --- 8. MANAGE HOME SERVICES SCREEN (For Home Tab) ---
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ManageHomeServicesScreen(navController: NavController) {
+    var title by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+    var serviceKeyInput by remember { mutableStateOf("") }
+    var homeServicesList by remember { mutableStateOf<List<AdminHomeServiceModel>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) { try { homeServicesList = supabase.postgrest["home_services"].select().decodeList<AdminHomeServiceModel>() } catch (e: Exception) {} }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Home Screen Cards") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
+        LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
+            item {
+                Text("Add Card to Home Screen", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Card Title (e.g. Ration Card)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = category, onValueChange = { category = it }, label = { Text("Category (e.g. Important Documents)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = serviceKeyInput, onValueChange = { serviceKeyInput = it }, label = { Text("Service Key (e.g. ration_card)") }, modifier = Modifier.fillMaxWidth())
+
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = {
+                    scope.launch {
+                        try {
+                            val newHomeService = AdminHomeServiceModel(title = title, category = category.ifEmpty { "New Updates" }, service_key = serviceKeyInput)
+                            supabase.postgrest["home_services"].insert(newHomeService)
+                            homeServicesList = supabase.postgrest["home_services"].select().decodeList<AdminHomeServiceModel>()
+                            title = ""; category = ""; serviceKeyInput = ""
+                            Toast.makeText(context, "Added to Home Screen!", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) { Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
+                    }
+                }, modifier = Modifier.fillMaxWidth()) { Text("Add to Home") }
+                Spacer(Modifier.height(24.dp))
+                Text("Existing Home Cards", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+            }
+
+            items(homeServicesList) { service ->
+                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(service.title, fontWeight = FontWeight.Bold)
+                            Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 12.sp)
+                        }
+                        IconButton(onClick = {
+                            scope.launch {
+                                try { service.id?.let { id -> supabase.postgrest["home_services"].delete { filter { eq("id", id) } }; homeServicesList = homeServicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
                             }
                         }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
@@ -330,7 +420,6 @@ fun ManageServiceInfoScreen(navController: NavController) {
                 OutlinedTextField(value = serviceKey, onValueChange = { serviceKey = it }, label = { Text("Service Key (e.g. aadhar, pan)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = heading, onValueChange = { heading = it }, label = { Text("Heading (e.g. What is Aadhaar?)") }, modifier = Modifier.fillMaxWidth())
 
-                // Bada text box details likhne ke liye
                 OutlinedTextField(
                     value = details,
                     onValueChange = { details = it },

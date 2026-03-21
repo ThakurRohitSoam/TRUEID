@@ -1,4 +1,3 @@
-
 package com.arpanapteam.trueid.Services
 
 import android.content.Intent
@@ -39,10 +38,11 @@ import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.TextGray
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.launch
 
-// --- 1. OFFLINE DATA STORE ---
-data class ServiceData(val title: String, val description: String, val icon: ImageVector, val route: String)
+// ==========================================
+// 1. OFFLINE DATA (AAPKI 30 SERVICES YAHAN SAFE HAIN)
+// ==========================================
+data class ServiceData(val title: String, val description: String, val icon: ImageVector, val route: String?, val urlKey: String? = null)
 data class ServiceCategory(val name: String, val items: List<ServiceData>)
 
 val offlineCategories = listOf(
@@ -91,41 +91,54 @@ val offlineCategories = listOf(
     ))
 )
 
+// ==========================================
+// 2. MAIN SCREEN LOGIC
+// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServicesScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<ServiceCategory?>(null) } // View All state
-    var adminUpdates by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    var selectedCategory by remember { mutableStateOf<ServiceCategory?>(null) }
+
+    var onlineUpdates by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        try { adminUpdates = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() }
+        try { onlineUpdates = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() }
         catch (e: Exception) {}
     }
 
-    // --- 4. VIEW ALL SCREEN LOGIC (✅ CRASH FIXED HERE) ---
-    val category = selectedCategory // State ko safe variable me save kiya
+    // 🟢 Category-wise Group karna aur service_key (urlKey) setup karna
+    val dynamicCategories = remember(onlineUpdates) {
+        onlineUpdates.groupBy { it.category ?: "New Services" }.map { (catName, services) ->
+            ServiceCategory(
+                name = catName,
+                items = services.map { adminService ->
+                    ServiceData(
+                        title = adminService.title,
+                        description = adminService.description,
+                        icon = Icons.Outlined.Apps,
+                        route = null,
+                        urlKey = adminService.service_key // ✅ Updated to match the clean model
+                    )
+                }
+            )
+        }
+    }
+
+    // ✅ FIX: Offline pehle, uske baad online naye categories
+    val allCategoriesList = offlineCategories + dynamicCategories
+
+    // --- VIEW ALL PAGE LOGIC ---
+    val category = selectedCategory
     if (category != null) {
         BackHandler { selectedCategory = null }
         Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(category.name, fontWeight = FontWeight.Bold) },
-                    navigationIcon = {
-                        IconButton(onClick = { selectedCategory = null }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-                )
-            },
+            topBar = { TopBarUI(title = category.name) { selectedCategory = null } },
             containerColor = OffWhite
         ) { padding ->
             LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp)) {
                 items(category.items) { service ->
-                    ServiceItemCard(service) { navController.navigate(service.route) }
+                    ServiceItemCard(service, navController)
                     Spacer(Modifier.height(12.dp))
                 }
             }
@@ -133,71 +146,36 @@ fun ServicesScreen(navController: NavHostController) {
         return
     }
 
-    // --- MAIN SERVICES SCREEN ---
+    // --- MAIN PAGE LOGIC ---
     Scaffold(
         containerColor = OffWhite,
-        topBar = { ServiceTopAppBar(navController) },
+        topBar = { TopBarUI("Services") { navController.navigateUp() } },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // --- 3. SEARCH BAR ---
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search for services.......") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-                    )
-                )
-            }
+            item { SearchBarUI(searchQuery) { searchQuery = it } }
 
             if (searchQuery.isNotEmpty()) {
-                // --- SEARCH FILTER RESULTS ---
-                val allServices = offlineCategories.flatMap { it.items }
-                val filtered = allServices.filter {
+                val filtered = allCategoriesList.flatMap { it.items }.filter {
                     it.title.contains(searchQuery, true) || it.description.contains(searchQuery, true)
                 }
-
                 item { Text("Search Results", fontWeight = FontWeight.Bold, fontSize = 18.sp) }
-
                 if (filtered.isEmpty()) {
                     item { Text("No services found.", color = Color.Gray) }
                 } else {
                     items(filtered) { service ->
-                        ServiceItemCard(service) { navController.navigate(service.route) }
+                        ServiceItemCard(service, navController)
                         Spacer(Modifier.height(12.dp))
                     }
                 }
             } else {
-                // --- 5. ADMIN UPDATES ---
-                if (adminUpdates.isNotEmpty()) {
-                    item {
-                        ServiceCategorySection("New Updates", onViewAllClick = { }) {
-                            adminUpdates.forEach { update ->
-                                val fakeServiceData = ServiceData(update.title, update.description, Icons.Outlined.NewReleases, "")
-                                ServiceItemCard(fakeServiceData) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(update.link_url))
-                                    context.startActivity(intent)
-                                }
-                                Spacer(Modifier.height(12.dp))
-                            }
-                        }
-                    }
-                }
-
-                // --- NORMAL CATEGORIES ---
-                items(offlineCategories) { cat ->
+                items(allCategoriesList) { cat ->
                     ServiceCategorySection(title = cat.name, onViewAllClick = { selectedCategory = cat }) {
                         cat.items.take(3).forEach { service ->
-                            ServiceItemCard(service) { navController.navigate(service.route) }
+                            ServiceItemCard(service, navController)
                             Spacer(Modifier.height(12.dp))
                         }
                     }
@@ -207,91 +185,78 @@ fun ServicesScreen(navController: NavHostController) {
     }
 }
 
+// ==========================================
+// 3. UI COMPONENTS
+// ==========================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceTopAppBar(navController: NavHostController) {
+fun TopBarUI(title: String, onBackClick: () -> Unit) {
     TopAppBar(
-        title = { Text(text = "Services", fontWeight = FontWeight.Bold, color = Color.Black) },
-        navigationIcon = {
-            IconButton(onClick = { navController.navigateUp() }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-        },
+        title = { Text(text = title, fontWeight = FontWeight.Bold, color = Color.Black) },
+        navigationIcon = { IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") } },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+    )
+}
+
+@Composable
+fun SearchBarUI(query: String, onQueryChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = query, onValueChange = onQueryChange, modifier = Modifier.fillMaxWidth(),
+        placeholder = { Text("Search for services.......") }, leadingIcon = { Icon(Icons.Default.Search, "") },
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
+            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
     )
 }
 
 @Composable
 fun ServiceCategorySection(title: String, onViewAllClick: () -> Unit, content: @Composable () -> Unit) {
     Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-
-            // Hide "View All" for the New Updates section
-            if (title != "New Updates") {
-                Text(
-                    text = "View All",
-                    fontSize = 14.sp,
-                    color = Indigo,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { onViewAllClick() }.padding(4.dp)
-                )
-            }
+            Text(text = "View All", fontSize = 14.sp, color = Indigo, fontWeight = FontWeight.Medium, modifier = Modifier.clickable { onViewAllClick() }.padding(4.dp))
         }
         Spacer(modifier = Modifier.height(16.dp))
         Column { content() }
     }
 }
 
+// 🔵 CARD CLICK HONE PAR NAYA PAGE KHULEGA
 @Composable
-fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
+fun ServiceItemCard(service: ServiceData, navController: NavHostController) {
+    val context = LocalContext.current
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        modifier = Modifier.fillMaxWidth().clickable {
+            if (service.route != null) {
+                // Offline service (e.g. "aadhar", "pan")
+                navController.navigate(service.route)
+            } else if (service.urlKey != null) {
+                // Online service -> Sirf Dynamic Page Khulega service_key (urlKey) ka use karke
+                if (service.urlKey.startsWith("http")) {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(service.urlKey))
+                    context.startActivity(intent)
+                } else {
+                    navController.navigate("dynamic_service/${service.urlKey}/${service.title}")
+                }
+            }
+        },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Indigo.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = service.icon,
-                    contentDescription = service.title,
-                    tint = Indigo,
-                    modifier = Modifier.size(24.dp)
-                )
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Indigo.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+                Icon(imageVector = service.icon, contentDescription = service.title, tint = Indigo, modifier = Modifier.size(24.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = service.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Text(
-                    text = service.description,
-                    fontSize = 13.sp,
-                    color = TextGray
-                )
+                Text(text = service.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(text = service.description, fontSize = 13.sp, color = TextGray)
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = "Go",
-                tint = Color.Gray
-            )
+            Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = "Go", tint = Color.Gray)
         }
     }
 }
@@ -303,4 +268,3 @@ fun ServicesScreenPreview() {
         ServicesScreen(rememberNavController())
     }
 }
-
