@@ -1,3 +1,4 @@
+/*
 package com.arpanapteam.trueid.Services
 
 import android.app.Activity
@@ -187,3 +188,4 @@ fun VoterPreview(){
         VoterIdScreen()
     }
 }
+*/

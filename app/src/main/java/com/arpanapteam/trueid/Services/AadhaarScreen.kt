@@ -1,4 +1,6 @@
+/*
 package com.arpanapteam.trueid.Services
+
 
 import android.content.Intent
 import android.net.Uri
@@ -141,3 +143,4 @@ fun AadhaarPreview() {
         AadhaarServicesScreen()
     }
 }
+*/

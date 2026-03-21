@@ -17,10 +17,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactUsScreen(onBack: () -> Unit = {}) {
+fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
 
     Scaffold(
         topBar = {

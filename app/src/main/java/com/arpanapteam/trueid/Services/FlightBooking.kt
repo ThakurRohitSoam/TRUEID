@@ -1,4 +1,6 @@
+/*
 package com.arpanapteam.trueid
+
 
 import android.content.Intent
 import android.net.Uri
@@ -188,3 +190,4 @@ fun AirlineTicketPreview() {
         AirlineTicketScreen()
     }
 }
+ */

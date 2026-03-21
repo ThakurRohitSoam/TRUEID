@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -65,6 +66,27 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    dependencies {
+
+        implementation("androidx.navigation:navigation-compose:2.8.3")
+        implementation("androidx.datastore:datastore-preferences:1.1.1")
+        implementation("io.github.jan-tennert.supabase:supabase-kt:2.0.0")
+        implementation("io.ktor:ktor-client-android:2.3.7")
+        // ... aapki purani dependencies yahan hongi ...
+
+        // 👇 YEH SAB ADD KAREIN 👇
+        // Supabase BOM (Versions manage karne ke liye)
+        implementation(platform("io.github.jan-tennert.supabase:bom:2.1.3"))
+
+        // Supabase Database Module
+        implementation("io.github.jan-tennert.supabase:postgrest-kt")
+
+        // Ktor (Network requests ke liye zaroori hai)
+        implementation("io.ktor:ktor-client-android:2.3.8")
+
+        // JSON Serialization (Data ko database format mein convert karne ke liye)
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+        implementation("io.coil-kt:coil-compose:2.6.0")
+    }
 }

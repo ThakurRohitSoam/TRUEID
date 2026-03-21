@@ -1,3 +1,4 @@
+/*
 package com.arpanapteam.trueid
 
 import android.content.Intent
@@ -206,4 +207,4 @@ fun MetroPreview() {
         MetroTicketScreen()
     }
 }
-
+*/

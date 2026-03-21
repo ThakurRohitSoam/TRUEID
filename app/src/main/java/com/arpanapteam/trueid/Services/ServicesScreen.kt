@@ -1,9 +1,14 @@
+
 package com.arpanapteam.trueid.Services
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,35 +25,126 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.arpanapteam.trueid.AdminServiceModel
+import com.arpanapteam.trueid.supabase
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.TextGray
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.launch
 
-data class ServiceData(val title: String, val description: String, val icon: ImageVector)
+// --- 1. OFFLINE DATA STORE ---
+data class ServiceData(val title: String, val description: String, val icon: ImageVector, val route: String)
+data class ServiceCategory(val name: String, val items: List<ServiceData>)
+
+val offlineCategories = listOf(
+    ServiceCategory("Important Documents", listOf(
+        ServiceData("Aadhar Card Update", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin, "aadhar"),
+        ServiceData("PAN Card Application", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.WorkOutline, "pan"),
+        ServiceData("Driving License", "Apply for a new or renew your driving license.", Icons.Outlined.Badge, "dl"),
+        ServiceData("Indian Passport", "Apply for a new Passport", Icons.Outlined.Work, "passport"),
+        ServiceData("Voter Id", "Apply for a new Voter Id ", Icons.Outlined.HowToVote, "voter")
+    )),
+    ServiceCategory("E-District Services", listOf(
+        ServiceData("Income Certificate", "Apply for new income certificate.", Icons.Outlined.Description, "income_certificate"),
+        ServiceData("Domicile Certificate", "Obtain a certificate of residency.", Icons.Outlined.Home, "domicile"),
+        ServiceData("Caste Certificate", "Apply for caste certificate.", Icons.Outlined.VerifiedUser, "caste"),
+        ServiceData("Ration Card", "Apply for New Ration Card", Icons.Outlined.VerifiedUser, "ration"),
+        ServiceData("Family Id", "Get your Family Id.", Icons.Outlined.VerifiedUser, "family")
+    )),
+    ServiceCategory("Government Schemes", listOf(
+        ServiceData("PM-Kisan", "₹6000 benefit yearly", Icons.Outlined.HomeWork, "pmkisan"),
+        ServiceData("PMKVY", "Skill training scheme", Icons.AutoMirrored.Outlined.Assignment, "pmkvy"),
+        ServiceData("UP Pension", "Pension schemes", Icons.AutoMirrored.Outlined.Assignment, "uppension")
+    )),
+    ServiceCategory("Scholarship", listOf(
+        ServiceData("UP Scholarship", "UP Scholarship portal", Icons.Outlined.School, "upscholarship"),
+        ServiceData("National Scholarship", "Central Govt scholarship", Icons.Outlined.HomeWork, "nsp"),
+        ServiceData("Saksham Scholarship", "AICTE scheme", Icons.AutoMirrored.Outlined.Assignment, "saksham")
+    )),
+    ServiceCategory("Education Board & Universities", listOf(
+        ServiceData("UP Board", "UPMSP", Icons.AutoMirrored.Outlined.Assignment, "upboard"),
+        ServiceData("CBSE", "CBSE Board", Icons.AutoMirrored.Outlined.Assignment, "cbse"),
+        ServiceData("BTEUP", "Technical Board", Icons.AutoMirrored.Outlined.Assignment, "bteup"),
+        ServiceData("ICSE", "CISCE Board", Icons.AutoMirrored.Outlined.Assignment, "cisce"),
+        ServiceData("AKTU", "University", Icons.AutoMirrored.Outlined.LibraryBooks, "aktu"),
+        ServiceData("CCSU", "University", Icons.AutoMirrored.Outlined.MenuBook, "ccsu")
+    )),
+    ServiceCategory("Property and Land Records", listOf(
+        ServiceData("UP Bhulekh", "Land records", Icons.Outlined.DocumentScanner, "bhulekh"),
+        ServiceData("Property Registration", "Register property", Icons.Outlined.PendingActions, "property_registration"),
+        ServiceData("Property Maps", "Geo maps", Icons.AutoMirrored.Outlined.Assignment, "property_maps")
+    )),
+    ServiceCategory("Travel & Ticket Bookings", listOf(
+        ServiceData("Indian Railway", "Book Indian Railway Tickets", Icons.Outlined.Train, "railway"),
+        ServiceData("Flight Booking", "Book Flight Tickets", Icons.Outlined.Flight, "flight"),
+        ServiceData("Metro Services", "Book Metro Tickets", Icons.Outlined.DirectionsRailwayFilled, "metro"),
+        ServiceData("Bus Booking", "Book Bus Tickets", Icons.Outlined.DirectionsBus, "bus")
+    ))
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServicesScreen(navController: NavHostController) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<ServiceCategory?>(null) } // View All state
+    var adminUpdates by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        try { adminUpdates = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() }
+        catch (e: Exception) {}
+    }
+
+    // --- 4. VIEW ALL SCREEN LOGIC (✅ CRASH FIXED HERE) ---
+    val category = selectedCategory // State ko safe variable me save kiya
+    if (category != null) {
+        BackHandler { selectedCategory = null }
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(category.name, fontWeight = FontWeight.Bold) },
+                    navigationIcon = {
+                        IconButton(onClick = { selectedCategory = null }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                )
+            },
+            containerColor = OffWhite
+        ) { padding ->
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp)) {
+                items(category.items) { service ->
+                    ServiceItemCard(service) { navController.navigate(service.route) }
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+        }
+        return
+    }
+
+    // --- MAIN SERVICES SCREEN ---
     Scaffold(
         containerColor = OffWhite,
         topBar = { ServiceTopAppBar(navController) },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            // --- 3. SEARCH BAR ---
             item {
-                var searchQuery by remember { mutableStateOf("") }
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
@@ -57,266 +153,104 @@ fun ServicesScreen(navController: NavHostController) {
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
+                        focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
                     )
                 )
             }
 
-            item {
-                ServiceCategorySection(title = "Important Documents") {
-
-                    ServiceItemCard(
-                        ServiceData(
-                            "Aadhar Card Update",
-                            "Update demographic or biometric details in your Aadhar card.",
-                            Icons.Outlined.PersonPin
-                        ),
-                        onClick = { navController.navigate("aadhar") }
-                    )
-
-                    ServiceItemCard(
-                        ServiceData(
-                            "PAN Card Application",
-                            "Apply for a new Permanent Account Number (PAN) card.",
-                            Icons.Outlined.WorkOutline
-                        ),
-                        onClick = { navController.navigate("pan") }
-                    )
-
-                    ServiceItemCard(
-                        ServiceData(
-                            "Driving License",
-                            "Apply for a new or renew your driving license.",
-                            Icons.Outlined.Badge
-                        ),
-                        onClick = { navController.navigate("dl") }
-                    )
-
-                    ServiceItemCard(
-                        ServiceData(
-                            "Indian Passport",
-                            "Apply for a new Passport",
-                            Icons.Outlined.Work
-                        ),
-                        onClick = { navController.navigate("passport") }
-                    )
-
-                    ServiceItemCard(
-                        ServiceData(
-                            "Voter Id",
-                            "Apply for a new Voter Id ",
-                            Icons.Outlined.HowToVote
-                        ),
-                        onClick = { navController.navigate("voter") }
-                    )
+            if (searchQuery.isNotEmpty()) {
+                // --- SEARCH FILTER RESULTS ---
+                val allServices = offlineCategories.flatMap { it.items }
+                val filtered = allServices.filter {
+                    it.title.contains(searchQuery, true) || it.description.contains(searchQuery, true)
                 }
 
-            }
+                item { Text("Search Results", fontWeight = FontWeight.Bold, fontSize = 18.sp) }
 
-            item {
-                ServiceCategorySection(title = "E-District Services") {
-
-                    ServiceItemCard(
-                        ServiceData("Income Certificate","Apply for new income certificate.",Icons.Outlined.Description)
-                    ) { navController.navigate("income_certificate") }
-
-                    ServiceItemCard(
-                        ServiceData("Domicile Certificate","Obtain a certificate of residency.",Icons.Outlined.Home)
-                    ) { navController.navigate("domicile") }
-
-                    ServiceItemCard(
-                        ServiceData("Caste Certificate","Apply for caste certificate.",Icons.Outlined.VerifiedUser)
-                    ) { navController.navigate("caste") }
-
-                    ServiceItemCard(
-                        ServiceData("Ration Card","Apply for New Ration Card",Icons.Outlined.VerifiedUser)
-                    ) { navController.navigate("ration") }
-
-                    ServiceItemCard(
-                        ServiceData("Family Id","Get your Family Id.",Icons.Outlined.VerifiedUser)
-                    ) { navController.navigate("family") }
+                if (filtered.isEmpty()) {
+                    item { Text("No services found.", color = Color.Gray) }
+                } else {
+                    items(filtered) { service ->
+                        ServiceItemCard(service) { navController.navigate(service.route) }
+                        Spacer(Modifier.height(12.dp))
+                    }
                 }
-            }
-
-            item {
-                ServiceCategorySection(title = "Government Schemes") {
-
-                    ServiceItemCard(
-                        ServiceData("PM-Kisan","₹6000 benefit yearly",Icons.Outlined.HomeWork)
-                    ) { navController.navigate("pmkisan") }
-
-                    ServiceItemCard(
-                        ServiceData("PMKVY","Skill training scheme",Icons.AutoMirrored.Outlined.Assignment)
-                    ) { navController.navigate("pmkvy") }
-
-                    ServiceItemCard(
-                        ServiceData("UP Pension","Pension schemes",Icons.AutoMirrored.Outlined.Assignment)
-                    ) { navController.navigate("uppension") }
+            } else {
+                // --- 5. ADMIN UPDATES ---
+                if (adminUpdates.isNotEmpty()) {
+                    item {
+                        ServiceCategorySection("New Updates", onViewAllClick = { }) {
+                            adminUpdates.forEach { update ->
+                                val fakeServiceData = ServiceData(update.title, update.description, Icons.Outlined.NewReleases, "")
+                                ServiceItemCard(fakeServiceData) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(update.link_url))
+                                    context.startActivity(intent)
+                                }
+                                Spacer(Modifier.height(12.dp))
+                            }
+                        }
+                    }
                 }
-            }
 
-            item {
-                ServiceCategorySection(title = "Scholarship") {
-
-                    ServiceItemCard(
-                        ServiceData("UP Scholarship","UP Scholarship portal",Icons.Outlined.School)
-                    ) { navController.navigate("upscholarship") }
-
-                    ServiceItemCard(
-                        ServiceData("National Scholarship","Central Govt scholarship",Icons.Outlined.HomeWork)
-                    ) { navController.navigate("nsp") }
-
-                    ServiceItemCard(
-                        ServiceData("Saksham Scholarship","AICTE scheme",Icons.AutoMirrored.Outlined.Assignment)
-                    ) { navController.navigate("saksham") }
-                }
-            }
-
-            item {
-                ServiceCategorySection(title = "Education Board & Universities") {
-
-                    ServiceItemCard(ServiceData("UP Board","UPMSP",Icons.AutoMirrored.Outlined.Assignment)) {
-                        navController.navigate("upboard")
-                    }
-
-                    ServiceItemCard(ServiceData("CBSE","CBSE Board",Icons.AutoMirrored.Outlined.Assignment)) {
-                        navController.navigate("cbse")
-                    }
-
-                    ServiceItemCard(ServiceData("BTEUP","Technical Board",Icons.AutoMirrored.Outlined.Assignment)) {
-                        navController.navigate("bteup")
-                    }
-
-                    ServiceItemCard(ServiceData("ICSE","CISCE Board",Icons.AutoMirrored.Outlined.Assignment)) {
-                        navController.navigate("cisce")
-                    }
-
-                    ServiceItemCard(ServiceData("AKTU","University",Icons.AutoMirrored.Outlined.LibraryBooks)) {
-                        navController.navigate("aktu")
-                    }
-
-                    ServiceItemCard(ServiceData("CCSU","University",Icons.AutoMirrored.Outlined.MenuBook)) {
-                        navController.navigate("ccsu")
+                // --- NORMAL CATEGORIES ---
+                items(offlineCategories) { cat ->
+                    ServiceCategorySection(title = cat.name, onViewAllClick = { selectedCategory = cat }) {
+                        cat.items.take(3).forEach { service ->
+                            ServiceItemCard(service) { navController.navigate(service.route) }
+                            Spacer(Modifier.height(12.dp))
+                        }
                     }
                 }
             }
-
-
-            item {
-                ServiceCategorySection(title = "Property and Land Records") {
-
-                    ServiceItemCard(ServiceData("UP Bhulekh","Land records",Icons.Outlined.DocumentScanner)) {
-                        navController.navigate("bhulekh")
-                    }
-
-                    ServiceItemCard(ServiceData("Property Registration","Register property",Icons.Outlined.PendingActions)) {
-                        navController.navigate("property_registration")
-                    }
-
-                    ServiceItemCard(ServiceData("Property Maps","Geo maps",Icons.AutoMirrored.Outlined.Assignment)) {
-                        navController.navigate("property_maps")
-                    }
-                }
-            }
-            // Travel & Ticket Bookings section ONLY updated
-
-            item {
-                ServiceCategorySection(title = "Travel & Ticket Bookings") {
-
-                    ServiceItemCard(
-                        ServiceData("Indian Railway","Book Indian Railway Tickets",Icons.Outlined.Train)
-                    ) {
-                        navController.navigate("railway")
-                    }
-
-                    ServiceItemCard(
-                        ServiceData("Flight Booking","Book Flight Tickets",Icons.Outlined.Flight)
-                    ) {
-                        navController.navigate("flight")
-                    }
-
-                    ServiceItemCard(
-                        ServiceData("Metro Services","Book Metro Tickets",Icons.Outlined.DirectionsRailwayFilled)
-                    ) {
-                        navController.navigate("metro")
-                    }
-
-                    ServiceItemCard(
-                        ServiceData("Bus Booking","Book Bus Tickets",Icons.Outlined.DirectionsBus)
-                    ) {
-                        navController.navigate("bus")
-                    }
-
-                }
-            }
-
-
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceTopAppBar(navController: NavHostController) {
     TopAppBar(
-        title = {
-            Text(
-                text = "Services",
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-        },
+        title = { Text(text = "Services", fontWeight = FontWeight.Bold, color = Color.Black) },
         navigationIcon = {
-            IconButton(onClick = {
-                navController.navigateUp()
-            }) {
+            IconButton(onClick = { navController.navigateUp() }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        )
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
 }
 
 @Composable
-fun ServiceCategorySection(title: String, content: @Composable () -> Unit) {
+fun ServiceCategorySection(title: String, onViewAllClick: () -> Unit, content: @Composable () -> Unit) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Text(
-                text = "View All",
-                fontSize = 14.sp,
-                color = Indigo,
-                fontWeight = FontWeight.Medium
-            )
+            Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+
+            // Hide "View All" for the New Updates section
+            if (title != "New Updates") {
+                Text(
+                    text = "View All",
+                    fontSize = 14.sp,
+                    color = Indigo,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable { onViewAllClick() }.padding(4.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            content()
-        }
+        Column { content() }
     }
 }
 
 @Composable
-fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
+fun ServiceItemCard(service: ServiceData, onClick: () -> Unit = {}) {
     Card(
-
-        // change by abhishek
-        modifier = Modifier.fillMaxWidth().clickable{onClick()},
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -365,7 +299,8 @@ fun ServiceItemCard(service: ServiceData,onClick: () -> Unit = {}) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ServicesScreenPreview() {
-    TRUEIDTheme() {
+    TRUEIDTheme {
         ServicesScreen(rememberNavController())
     }
 }
+

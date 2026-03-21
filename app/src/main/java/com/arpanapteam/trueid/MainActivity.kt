@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.sp
 
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.*
 
 import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
@@ -44,7 +46,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
 
@@ -58,10 +59,10 @@ class MainActivity : ComponentActivity() {
 
             TRUEIDTheme {
                 MainAppUI(
-                    isDarkTheme,
-                    onToggleTheme = {
+                    isDarkTheme = isDarkTheme,
+                    onToggleTheme = { themeValue ->
                         scope.launch {
-                            ThemePreference.saveTheme(context, it)
+                            ThemePreference.saveTheme(context, themeValue)
                         }
                     }
                 )
@@ -75,7 +76,6 @@ fun MainAppUI(
     isDarkTheme: Boolean,
     onToggleTheme: (Boolean) -> Unit
 ) {
-
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -95,7 +95,6 @@ fun MainAppUI(
             )
         }
     ) {
-
         Scaffold(
             contentWindowInsets = WindowInsets(0,0,0,0),
             bottomBar = { TrueIdBottomBar(navController) }
@@ -106,108 +105,74 @@ fun MainAppUI(
                 startDestination = "home",
                 modifier = Modifier.padding(padding)
             ) {
-
-                composable("home") {
-                    TrueIdHomeScreen(
-                        openDrawer = openDrawer,
-                        navController = navController
-                    )
-                }
-
-                composable("services") {
-                    ServicesScreen(navController)
-                }
-
-                composable("income_certificate") {
-                    IncomeCertificateScreen(
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-
-                composable("railway") { RailwayLinksScreen() }
-
-                composable("flight") {
-                    AirlineTicketScreen { navController.popBackStack() }
-                }
-
-                composable("metro") {
-                    MetroTicketScreen { navController.popBackStack() }
-                }
-
-                composable("bus") {
-                    BusTicketScreen { navController.popBackStack() }
-                }
-
-                composable("feedback") {
-                    MultiStepFeedbackScreen(
-                        { navController.popBackStack() },
-                        { navController.popBackStack() }
-                    )
-                }
-
+                // --- MAIN APP SCREENS ---
+                composable("home") { TrueIdHomeScreen(openDrawer = openDrawer, navController = navController) }
+                composable("services") { ServicesScreen(navController) }
                 composable("news") { NewsScreen(navController) }
+                composable("feedback") { MultiStepFeedbackScreen({ navController.popBackStack() }, { navController.popBackStack() }) }
                 composable("about") { AboutScreen(navController) }
                 composable("terms") { TermsAndConditionsScreen(navController) }
+                composable("contact") { ContactUsScreen(navController = navController, onBack = { navController.popBackStack() }) }
 
-                // DOCUMENT SERVICES
-
-                composable("aadhar") {
-                    AadhaarServicesScreen {
-                        navController.popBackStack()
-                    }
+                composable(
+                    route = "news_detail/{newsId}",
+                    arguments = listOf(navArgument("newsId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val newsId = backStackEntry.arguments?.getInt("newsId") ?: return@composable
+                    NewsDetailScreen(newsId = newsId, onBack = { navController.popBackStack() })
                 }
 
-                composable("pan") {
-                    PanCardScreen {
-                        navController.popBackStack()
-                    }
-                }
+                // --- ADMIN ROUTES ---
+                composable("admin_login") { AdminLoginScreen(navController) }
+                composable("admin_dashboard") { AdminDashboardScreen(navController) }
+                composable("manage_services") { ManageServicesScreen(navController) }
+                composable("manage_news") { ManageNewsScreen(navController) }
+                composable("view_feedback") { ViewFeedbackScreen(navController) }
+                composable("manage_service_links") { ManageServiceLinksScreen(navController) } // NAYA ADMIN PAGE
 
-                composable("voter") {
-                    VoterIdScreen {
-                        navController.popBackStack()
-                    }
-                }
+                // ==========================================
+                // 🚀 DYNAMIC SERVICES ROUTING (THE MAGIC PART)
+                // ==========================================
 
-                composable("passport") {
-                    PassportScreen {
-                        navController.popBackStack()
-                    }
-                }
+                // Documents
+                composable("aadhar") { DynamicServiceScreen(navController, "aadhar", "Aadhaar Services") }
+                composable("pan") { DynamicServiceScreen(navController, "pan", "PAN Card Services") }
+                composable("dl") { DynamicServiceScreen(navController, "dl", "Driving License") }
+                composable("passport") { DynamicServiceScreen(navController, "passport", "Indian Passport") }
+                composable("voter") { DynamicServiceScreen(navController, "voter", "Voter ID") }
 
-                composable("dl") {
-                    DrivingLicenseScreen {
-                        navController.popBackStack()
-                    }
-                }
                 // E-District
-                composable("domicile") { DomicileCertificateScreen { navController.popBackStack() } }
-                composable("caste") { CasteCertificateScreen { navController.popBackStack() } }
-                composable("ration") { RationCardScreen { navController.popBackStack() } }
-                composable("family") { FamilyIdScreen { navController.popBackStack() } }
+                composable("income_certificate") { DynamicServiceScreen(navController, "income_certificate", "Income Certificate") }
+                composable("domicile") { DynamicServiceScreen(navController, "domicile", "Domicile Certificate") }
+                composable("caste") { DynamicServiceScreen(navController, "caste", "Caste Certificate") }
+                composable("ration") { DynamicServiceScreen(navController, "ration", "Ration Card") }
+                composable("family") { DynamicServiceScreen(navController, "family", "Family ID") }
 
-// Schemes
-                composable("pmkisan") { PMKisanScreen { navController.popBackStack() } }
-                composable("pmkvy") { PMKVYScreen { navController.popBackStack() } }
-                composable("uppension") { UPPensionScreen { navController.popBackStack() } }
+                // Schemes & Scholarship
+                composable("pmkisan") { DynamicServiceScreen(navController, "pmkisan", "PM-Kisan Scheme") }
+                composable("pmkvy") { DynamicServiceScreen(navController, "pmkvy", "PMKVY Training") }
+                composable("uppension") { DynamicServiceScreen(navController, "uppension", "UP Pension Services") }
+                composable("upscholarship") { DynamicServiceScreen(navController, "upscholarship", "UP Scholarship") }
+                composable("nsp") { DynamicServiceScreen(navController, "nsp", "National Scholarship") }
+                composable("saksham") { DynamicServiceScreen(navController, "saksham", "Saksham Scholarship") }
 
-// Scholarship
-                composable("upscholarship") { ScholarshipScreen { navController.popBackStack() } }
-                composable("nsp") { NSPScreen { navController.popBackStack() } }
-                composable("saksham") { SakshamScholarshipScreen { navController.popBackStack() } }
+                // Boards
+                composable("upboard") { DynamicServiceScreen(navController, "upboard", "UP Board (UPMSP)") }
+                composable("cbse") { DynamicServiceScreen(navController, "cbse", "CBSE Board") }
+                composable("bteup") { DynamicServiceScreen(navController, "bteup", "BTEUP") }
+                composable("cisce") { DynamicServiceScreen(navController, "cisce", "ICSE Board") }
+                composable("aktu") { DynamicServiceScreen(navController, "aktu", "AKTU University") }
+                composable("ccsu") { DynamicServiceScreen(navController, "ccsu", "CCSU University") }
 
-// Boards
-                composable("upboard") { UPBoardScreen { navController.popBackStack() } }
-                composable("cbse") { CbseScreen { navController.popBackStack() } }
-                composable("bteup") { BteupScreen { navController.popBackStack() } }
-                composable("cisce") { CisceScreen { navController.popBackStack() } }
-                composable("aktu") { AktuScreen { navController.popBackStack() } }
-                composable("ccsu") { CcsuScreen { navController.popBackStack() } }
-
-// Property
-                composable("bhulekh") { BhulekhScreen { navController.popBackStack() } }
-                composable("property_registration") { PropertyRegistrationScreen { navController.popBackStack() } }
-                composable("property_maps") { PropertyMapsScreen { navController.popBackStack() } }
+                // Property & Transport
+                composable("bhulekh") { DynamicServiceScreen(navController, "bhulekh", "UP Bhulekh") }
+                composable("property_registration") { DynamicServiceScreen(navController, "property_registration", "Property Registration") }
+                composable("property_maps") { DynamicServiceScreen(navController, "property_maps", "Property Maps") }
+                composable("railway") { DynamicServiceScreen(navController, "railway", "Indian Railway") }
+                composable("flight") { DynamicServiceScreen(navController, "flight", "Flight Booking") }
+                composable("metro") { DynamicServiceScreen(navController, "metro", "Metro Services") }
+                composable("bus") { DynamicServiceScreen(navController, "bus", "Bus Ticket Booking") }
+                composable("manage_service_info") { ManageServiceInfoScreen(navController) }
             }
         }
     }
@@ -215,7 +180,6 @@ fun MainAppUI(
 
 @Composable
 fun TrueIdBottomBar(navController: NavController) {
-
     val items = listOf(
         BottomNavItem("Home", Icons.Outlined.Home, "home"),
         BottomNavItem("Services", Icons.Outlined.Apps, "services"),
@@ -227,34 +191,22 @@ fun TrueIdBottomBar(navController: NavController) {
     val current = backStack?.destination
 
     NavigationBar(containerColor = Color.White) {
-
         items.forEach { item ->
             NavigationBarItem(
                 selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId){
-                            saveState = true
-                        }
+                        popUpTo(navController.graph.startDestinationId){ saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
                 },
                 label = { Text(item.label, fontSize = 12.sp) },
                 icon = { Icon(item.icon, item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Indigo,
-                    selectedTextColor = Indigo,
-                    indicatorColor = OffWhite
-                )
+                colors = NavigationBarItemDefaults.colors(selectedIconColor = Indigo, selectedTextColor = Indigo, indicatorColor = OffWhite)
             )
         }
     }
 }
 
-data class BottomNavItem(
-    val label: String,
-    val icon: ImageVector,
-    val route: String
-)
-
+data class BottomNavItem(val label: String, val icon: ImageVector, val route: String)

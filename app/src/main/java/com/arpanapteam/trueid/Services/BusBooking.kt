@@ -1,3 +1,4 @@
+/*
 package com.arpanapteam.trueid.Services
 
 import android.content.Intent
@@ -26,6 +27,8 @@ data class BusInfo(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
+ 
 fun BusTicketScreen(onBack: () -> Unit = {}) {
 
     val context = LocalContext.current
@@ -201,3 +204,4 @@ fun BusPreview() {
         BusTicketScreen()
     }
 }
+*/

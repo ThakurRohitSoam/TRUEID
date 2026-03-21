@@ -1,6 +1,8 @@
 package com.arpanapteam.trueid
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,7 +12,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -31,11 +33,13 @@ fun TrueIdHomeScreen(
     openDrawer: () -> Unit,
     navController: NavHostController
 ) {
-
     Scaffold(
         containerColor = OffWhite,
         topBar = {
-            TrueIdTopAppBar(onMenuClick = openDrawer)
+            TrueIdTopAppBar(
+                onMenuClick = openDrawer,
+                onAdminAccess = { navController.navigate("admin_login") } // Hidden navigation trigger
+            )
         }
     ) { paddingValues ->
 
@@ -90,23 +94,47 @@ fun TrueIdHomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrueIdTopAppBar(onMenuClick: () -> Unit) {
+fun TrueIdTopAppBar(onMenuClick: () -> Unit, onAdminAccess: () -> Unit) {
+    // State variables for the hidden 5-tap admin logic
+    var tapCount by remember { mutableIntStateOf(0) }
+    var lastTapTime by remember { mutableLongStateOf(0L) }
+
     TopAppBar(
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.VerifiedUser,null,tint = Indigo)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null // Hides the ripple effect so the secret remains hidden
+                ) {
+                    val currentTime = System.currentTimeMillis()
+                    // If taps are less than 500ms apart, count them
+                    if (currentTime - lastTapTime < 500) {
+                        tapCount++
+                        if (tapCount >= 5) {
+                            tapCount = 0 // Reset counter
+                            onAdminAccess() // Trigger the navigation
+                        }
+                    } else {
+                        // Reset if the user taps too slowly
+                        tapCount = 1
+                    }
+                    lastTapTime = currentTime
+                }
+            ) {
+                Icon(Icons.Outlined.VerifiedUser, null, tint = Indigo)
                 Spacer(Modifier.width(8.dp))
                 Text("TRUEID", fontWeight = FontWeight.Bold)
             }
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                Icon(Icons.Default.Menu,null)
+                Icon(Icons.Default.Menu, null)
             }
         },
         actions = {
             IconButton(onClick = {}) {
-                Icon(Icons.Default.Search,null)
+                Icon(Icons.Default.Search, null)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
