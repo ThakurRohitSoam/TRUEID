@@ -5,12 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState // 🟢 Scroll ke liye import kiya
-import androidx.compose.foundation.verticalScroll // 🟢 Scroll ke liye import kiya
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Star // 🟢 Star icon import
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,15 +45,22 @@ val supabase = createSupabaseClient(
 @Serializable
 data class AdminServiceModel(val id: Int? = null, val title: String, val description: String, val category: String? = null, val service_key: String, val created_at: String? = null)
 
-// 🆕 Naya model Home Screen ke liye
 @Serializable
 data class AdminHomeServiceModel(val id: Int? = null, val title: String, val category: String? = null, val service_key: String, val created_at: String? = null)
 
 @Serializable
 data class AdminNewsModel(val id: Int? = null, val tag: String, val date: String, val title: String, val short_content: String, val full_content: String, val image_url: String, val created_at: String? = null)
 
+// 🟢 NEW FEEDBACK MODEL WITH RATING & EMAIL
 @Serializable
-data class FeedbackModel(val id: Int? = null, val name: String, val message: String, val created_at: String? = null)
+data class FeedbackModel(
+    val id: Int? = null,
+    val name: String,
+    val email: String,
+    val rating: Int,
+    val message: String,
+    val created_at: String? = null
+)
 
 @Serializable
 data class ServiceLinkModel(val id: Int? = null, val service_key: String, val button_title: String, val url: String, val created_at: String? = null)
@@ -76,7 +84,7 @@ fun AdminLoginScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState()), // 🟢 Scroll fix added
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -113,17 +121,16 @@ fun AdminDashboardScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()), // 🟢 Scroll fix added
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 🆕 Naya button Home Services ke liye
             AdminMenuCard("Manage Home Services", "Add special cards ONLY for Home Screen") { navController.navigate("manage_home_services") }
             AdminMenuCard("Manage Services", "Create Category & Add App Service Cards") { navController.navigate("manage_services") }
             AdminMenuCard("Manage News", "Post or delete news alerts") { navController.navigate("manage_news") }
             AdminMenuCard("Manage Inside Links", "Add inside buttons/links for inside pages.") { navController.navigate("manage_service_links") }
             AdminMenuCard("Manage Intro Info", "Add Introduction inside the page (e.g., What is Aadhaar?)") { navController.navigate("manage_service_info") }
             AdminMenuCard("View Feedback", "Read user feedback") { navController.navigate("view_feedback") }
-            Spacer(Modifier.height(16.dp)) // Extra space at bottom
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
@@ -139,7 +146,7 @@ fun AdminMenuCard(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
-// --- 3. MANAGE SERVICES SCREEN (For Services Tab) ---
+// --- 3. MANAGE SERVICES SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageServicesScreen(navController: NavController) {
@@ -207,7 +214,7 @@ fun ManageServicesScreen(navController: NavController) {
     }
 }
 
-// 🆕 --- 8. MANAGE HOME SERVICES SCREEN (For Home Tab) ---
+// --- 8. MANAGE HOME SERVICES SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageHomeServicesScreen(navController: NavController) {
@@ -323,21 +330,64 @@ fun ManageNewsScreen(navController: NavController) {
     }
 }
 
-// --- 5. VIEW FEEDBACK SCREEN ---
+// 🟢 --- 5. VIEW FEEDBACK SCREEN (SMART UI FIX) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFeedbackScreen(navController: NavController) {
     var feedbackList by remember { mutableStateOf<List<FeedbackModel>>(emptyList()) }
-    LaunchedEffect(Unit) { try { feedbackList = supabase.postgrest["feedback"].select().decodeList<FeedbackModel>() } catch (e: Exception) {} }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("User Feedback") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
+    LaunchedEffect(Unit) {
+        try {
+            feedbackList = supabase.postgrest["feedback"].select().decodeList<FeedbackModel>()
+        } catch (e: Exception) {}
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("User Feedback") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, "")
+                    }
+                }
+            )
+        }
+    ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
             items(feedbackList) { feedback ->
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
+
+                // 🟢 Rating ke hisaab se Color Change Logic
+                val ratingColor = when {
+                    feedback.rating >= 4 -> Color(0xFF2E7D32) // Dark Green (Positive)
+                    feedback.rating == 3 -> Color(0xFFF57F17) // Orange (Neutral)
+                    else -> Color(0xFFD32F2F) // Red (Negative)
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp)
+                ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(feedback.name, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
-                        Spacer(Modifier.height(4.dp))
-                        Text(feedback.message)
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(feedback.name, fontWeight = FontWeight.Bold, color = Indigo, fontSize = 16.sp)
+
+                            // ⭐ Star aur Rating number ek sath
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.Star, contentDescription = null, tint = ratingColor, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("${feedback.rating}/5", fontWeight = FontWeight.Bold, color = ratingColor)
+                            }
+                        }
+
+                        Text(feedback.email, color = Color.Gray, fontSize = 12.sp) // Email chota aur grey
+                        Spacer(Modifier.height(8.dp))
+                        Text(feedback.message, fontSize = 14.sp)
                     }
                 }
             }

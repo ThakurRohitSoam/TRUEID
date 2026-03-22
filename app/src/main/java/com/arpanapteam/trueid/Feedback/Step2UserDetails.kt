@@ -1,3 +1,4 @@
+/*
 package com.arpanapteam.trueid.Feedback
 
 import androidx.compose.foundation.layout.Arrangement
@@ -106,3 +107,4 @@ fun Step2UserDetails(
         }
     }
 }
+*/

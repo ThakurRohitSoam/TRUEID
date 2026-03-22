@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
@@ -23,12 +26,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arpanapteam.trueid.ui.theme.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import io.github.jan.supabase.postgrest.postgrest
@@ -77,6 +84,8 @@ fun TrueIdHomeScreen(
     navController: NavHostController
 ) {
     var onlineHomeUpdates by remember { mutableStateOf<List<AdminHomeServiceModel>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
@@ -86,12 +95,9 @@ fun TrueIdHomeScreen(
         }
     }
 
-    // 🟢 MAGIC FIX: Chunking (Max 3 items per card)
     val dynamicCategories = remember(onlineHomeUpdates) {
         onlineHomeUpdates.groupBy { it.category ?: "New Services" }.flatMap { (catName, services) ->
-            // services ko 3-3 ke hisso (chunks) mein baant diya
             services.chunked(3).mapIndexed { index, chunkedServices ->
-                // Agar ek hi category mein 3 se zyada hain, toh 'Part 2', 'Part 3' likh kar naya card banega
                 val displayTitle = if (index == 0) catName else "$catName (Part ${index + 1})"
 
                 HomeServiceCategory(
@@ -111,12 +117,31 @@ fun TrueIdHomeScreen(
 
     val allHomeCategories = offlineHomeCategories + dynamicCategories
 
+    // 🟢 SEARCH FILTER LOGIC
+    val filteredCategories = if (searchQuery.isBlank()) {
+        allHomeCategories
+    } else {
+        allHomeCategories.mapNotNull { category ->
+            val matchingItems = category.items.filter {
+                it.name.contains(searchQuery, ignoreCase = true)
+            }
+            if (matchingItems.isNotEmpty()) category.copy(items = matchingItems) else null
+        }
+    }
+
     Scaffold(
         containerColor = OffWhite,
         topBar = {
             TrueIdTopAppBar(
-                onMenuClick = openDrawer,
-                onAdminAccess = { navController.navigate("admin_login") }
+                openDrawer = openDrawer,
+                navController = navController,
+                isSearchActive = isSearchActive,
+                searchQuery = searchQuery,
+                onSearchActiveChange = { active ->
+                    isSearchActive = active
+                    if (!active) searchQuery = "" // Clear text when search closed
+                },
+                onSearchQueryChange = { searchQuery = it }
             )
         }
     ) { paddingValues ->
@@ -128,14 +153,23 @@ fun TrueIdHomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item { HeroCard() }
 
-            items(allHomeCategories) { category ->
-                ServiceCategoryCard(
-                    title = category.title,
-                    items = category.items,
-                    navController = navController
-                )
+            if (!isSearchActive) {
+                item { HeroCard() }
+            }
+
+            if (filteredCategories.isEmpty()) {
+                item {
+                    Text("No services found.", color = Color.Gray, modifier = Modifier.padding(top = 16.dp))
+                }
+            } else {
+                items(filteredCategories) { category ->
+                    ServiceCategoryCard(
+                        title = category.title,
+                        items = category.items,
+                        navController = navController
+                    )
+                }
             }
         }
     }
@@ -146,41 +180,87 @@ fun TrueIdHomeScreen(
 // ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrueIdTopAppBar(onMenuClick: () -> Unit, onAdminAccess: () -> Unit) {
+fun TrueIdTopAppBar(
+    openDrawer: () -> Unit,
+    navController: NavHostController,
+    isSearchActive: Boolean,
+    searchQuery: String,
+    onSearchActiveChange: (Boolean) -> Unit,
+    onSearchQueryChange: (String) -> Unit
+) {
     var tapCount by remember { mutableIntStateOf(0) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
 
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     TopAppBar(
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastTapTime < 500) {
-                        tapCount++
-                        if (tapCount >= 5) {
-                            tapCount = 0
-                            onAdminAccess()
-                        }
-                    } else {
-                        tapCount = 1
-                    }
-                    lastTapTime = currentTime
+            if (isSearchActive) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    placeholder = { Text("Search services...", color = Color.Gray, fontSize = 16.sp) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        cursorColor = Indigo
+                    ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() })
+                )
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
                 }
-            ) {
-                Icon(Icons.Outlined.VerifiedUser, null, tint = Indigo)
-                Spacer(Modifier.width(8.dp))
-                Text("TRUEID", fontWeight = FontWeight.Bold)
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - lastTapTime < 500) {
+                            tapCount++
+                            if (tapCount >= 5) {
+                                tapCount = 0
+                                navController.navigate("admin_login")
+                            }
+                        } else {
+                            tapCount = 1
+                        }
+                        lastTapTime = currentTime
+                    }
+                ) {
+                    Icon(Icons.Outlined.VerifiedUser, null, tint = Indigo)
+                    Spacer(Modifier.width(8.dp))
+                    Text("TRUEID", fontWeight = FontWeight.Bold, color = Color.Black)
+                }
             }
         },
         navigationIcon = {
-            IconButton(onClick = onMenuClick) { Icon(Icons.Default.Menu, null) }
+            if (isSearchActive) {
+                IconButton(onClick = { onSearchActiveChange(false) }) {
+                    Icon(Icons.Default.Close, contentDescription = "Close Search", tint = Color.Black)
+                }
+            } else {
+                IconButton(onClick = openDrawer) {
+                    Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                }
+            }
         },
         actions = {
-            IconButton(onClick = {}) { Icon(Icons.Default.Search, null) }
+            if (!isSearchActive) {
+                IconButton(onClick = { onSearchActiveChange(true) }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Black)
+                }
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
@@ -231,7 +311,7 @@ fun ServiceCategoryCard(
     }
 }
 
-// 🔵 CARD CLICK LOGIC FIX
+// 🔵 CARD CLICK LOGIC FIX - AAB HAR CLICK PAR DYNAMIC SCREEN KHULEGI
 @Composable
 fun ServiceItemRow(
     item: HomeServiceItem,
@@ -250,21 +330,17 @@ fun ServiceItemRow(
         Button(
             onClick = {
                 try {
-                    // Navigation Logic
                     if (item.route != null) {
                         navController.navigate(item.route)
                     } else if (!item.urlKey.isNullOrEmpty()) {
-                        if (item.urlKey.startsWith("http")) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.urlKey)))
-                        } else {
-                            // 🟢 CRASH FIX: URL Encoding kiya gaya hai taaki Space (" ") aane par crash na ho
-                            val safeKey = Uri.encode(item.urlKey)
-                            val safeName = Uri.encode(item.name)
-                            navController.navigate("dynamic_service/$safeKey/$safeName")
-                        }
+                        // 🟢 YAHAN FIX HAI: Direct link open hone wala system hata diya.
+                        // Ab seedha 'dynamic_service' wala page khulega.
+                        val safeKey = Uri.encode(item.urlKey.trim())
+                        val safeName = Uri.encode(item.name.trim())
+                        navController.navigate("dynamic_service/$safeKey/$safeName")
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Page not found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Failed to open page", Toast.LENGTH_SHORT).show()
                 }
             },
             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 2.dp),

@@ -1,4 +1,6 @@
+/*
 package com.arpanapteam.trueid.Feedback
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,3 +63,6 @@ fun RatingRow(rating: Int, onRatingChange: (Int) -> Unit) {
         Text("Excellent", color = Color.Gray, fontSize = 12.sp)
     }
 }
+
+
+ */

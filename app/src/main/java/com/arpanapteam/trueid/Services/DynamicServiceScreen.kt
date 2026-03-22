@@ -24,13 +24,13 @@ import com.arpanapteam.trueid.ui.theme.OffWhite
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 import com.arpanapteam.trueid.ServiceLinkModel
-import com.arpanapteam.trueid.ServiceInfoModel // Naya model
+import com.arpanapteam.trueid.ServiceInfoModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DynamicServiceScreen(
     navController: NavController,
-    serviceKey: String, // e.g. "aadhar", "pan"
+    serviceKey: String, // e.g. "aadhar", "pan", "helth card"
     pageTitle: String   // e.g. "Aadhaar Services"
 ) {
     val context = LocalContext.current
@@ -38,23 +38,36 @@ fun DynamicServiceScreen(
     var serviceInfo by remember { mutableStateOf<ServiceInfoModel?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Fetch Introduction & Links simultaneously
     LaunchedEffect(serviceKey) {
+        // 🟢 SUPER SMART FIX: Spaces hatao aur sabko small letters me kar do (e.g. "Aadhar Card" -> "aadharcard")
+        val safeSearchKey = serviceKey.trim().lowercase().replace(" ", "")
+
         try {
-            // 1. Fetch Service Info (Introduction Card)
-            val infoResult = supabase.postgrest["service_info"]
-                .select { filter { eq("service_key", serviceKey) } }
-                .decodeList<ServiceInfoModel>()
-            serviceInfo = infoResult.firstOrNull()
+            // 1. Fetch ALL Service Info
+            val allIntros = supabase.postgrest["service_info"].select().decodeList<ServiceInfoModel>()
 
-            // 2. Fetch Service Links (Go Buttons)
-            val linksResult = supabase.postgrest["service_links"]
-                .select { filter { eq("service_key", serviceKey) } }
-                .decodeList<ServiceLinkModel>()
-            links = linksResult
-
+            // Kotlin ke andar Smart Matching: Aadha word (half-word) idhar ya udhar, kahin bhi mile toh pakad lo!
+            serviceInfo = allIntros.firstOrNull { info ->
+                val dbKey = info.service_key.trim().lowercase().replace(" ", "")
+                dbKey.isNotEmpty() && safeSearchKey.isNotEmpty() &&
+                        (dbKey.contains(safeSearchKey) || safeSearchKey.contains(dbKey))
+            }
         } catch (e: Exception) {
-            println("Error: ${e.message}")
+            println("Info Error: ${e.message}")
+        }
+
+        try {
+            // 2. Fetch ALL Service Links
+            val allLinks = supabase.postgrest["service_links"].select().decodeList<ServiceLinkModel>()
+
+            // Kotlin ke andar Smart Matching for Links
+            links = allLinks.filter { link ->
+                val dbKey = link.service_key.trim().lowercase().replace(" ", "")
+                dbKey.isNotEmpty() && safeSearchKey.isNotEmpty() &&
+                        (dbKey.contains(safeSearchKey) || safeSearchKey.contains(dbKey))
+            }
+        } catch (e: Exception) {
+            println("Links Error: ${e.message}")
         } finally {
             isLoading = false
         }
@@ -80,16 +93,15 @@ fun DynamicServiceScreen(
             LazyColumn(
                 modifier = Modifier.padding(pad).fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp) // Gap between cards
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                // --- 🟢 INTRODUCTION CARD (WHAT IS AADHAAR?) ---
+                // --- 🟢 INTRODUCTION CARD ---
                 serviceInfo?.let { info ->
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(18.dp),
-                            // Aapke screenshot jaisa light purple background color
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF2EFF6)),
                             elevation = CardDefaults.cardElevation(0.dp)
                         ) {
@@ -104,7 +116,7 @@ fun DynamicServiceScreen(
                                 Text(
                                     text = info.details,
                                     fontSize = 15.sp,
-                                    lineHeight = 24.sp, // Line height for readable paragraphs
+                                    lineHeight = 24.sp,
                                     color = Color(0xFF202020)
                                 )
                             }

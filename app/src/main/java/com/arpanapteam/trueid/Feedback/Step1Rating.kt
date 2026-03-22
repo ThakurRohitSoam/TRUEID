@@ -1,4 +1,6 @@
+/*
 package com.arpanapteam.trueid.Feedback
+
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,3 +58,6 @@ fun Step1Rating(
         Text("Next →", fontSize = 18.sp)
     }
 }
+
+
+ */

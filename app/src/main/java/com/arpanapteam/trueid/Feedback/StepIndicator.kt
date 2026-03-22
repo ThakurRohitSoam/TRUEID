@@ -1,4 +1,5 @@
-package com.arpanapteam.trueid.Feedback
+
+/* package com.arpanapteam.trueid.Feedback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -69,3 +70,4 @@ fun StepCircle(number: String, isActive: Boolean, isCompleted: Boolean) {
         )
     }
 }
+*/
