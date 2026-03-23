@@ -160,7 +160,7 @@ fun MainAppUI(
                 // Documents
                 composable("aadhar") { DynamicServiceScreen(navController, "aadhar", "Aadhaar Services") }
                 composable("pan") { DynamicServiceScreen(navController, "pan", "PAN Card Services") }
-                composable("dl") { DynamicServiceScreen(navController, "dl", "Driving License") }
+                composable("dl") { DynamicServiceScreen(navController, "Driving Licence", "Driving Licence") }
                 composable("passport") { DynamicServiceScreen(navController, "passport", "Indian Passport") }
                 composable("voter") { DynamicServiceScreen(navController, "voter", "Voter ID") }
 
