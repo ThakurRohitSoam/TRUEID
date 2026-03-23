@@ -11,7 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.Star // 🟢 Star icon import
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,7 +51,6 @@ data class AdminHomeServiceModel(val id: Int? = null, val title: String, val cat
 @Serializable
 data class AdminNewsModel(val id: Int? = null, val tag: String, val date: String, val title: String, val short_content: String, val full_content: String, val image_url: String, val created_at: String? = null)
 
-// 🟢 NEW FEEDBACK MODEL WITH RATING & EMAIL
 @Serializable
 data class FeedbackModel(
     val id: Int? = null,
@@ -156,6 +155,9 @@ fun ManageServicesScreen(navController: NavController) {
     var serviceKeyInput by remember { mutableStateOf("") }
 
     var servicesList by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
+    // 🟢 DELETE CONFIRMATION STATE
+    var itemToDelete by remember { mutableStateOf<AdminServiceModel?>(null) }
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -176,12 +178,7 @@ fun ManageServicesScreen(navController: NavController) {
                 Button(onClick = {
                     scope.launch {
                         try {
-                            val newService = AdminServiceModel(
-                                title = title,
-                                description = description,
-                                category = category.ifEmpty { "New Updates" },
-                                service_key = serviceKeyInput
-                            )
+                            val newService = AdminServiceModel(title = title, description = description, category = category.ifEmpty { "New Updates" }, service_key = serviceKeyInput)
                             supabase.postgrest["services"].insert(newService)
                             servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>()
                             title = ""; description = ""; category = ""; serviceKeyInput = ""
@@ -202,14 +199,31 @@ fun ManageServicesScreen(navController: NavController) {
                             Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 12.sp)
                             Text("Key: ${service.service_key}", color = Indigo, fontSize = 12.sp)
                         }
-                        IconButton(onClick = {
-                            scope.launch {
-                                try { service.id?.let { id -> supabase.postgrest["services"].delete { filter { eq("id", id) } }; servicesList = servicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
-                            }
-                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                        IconButton(onClick = { itemToDelete = service }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
+        }
+
+        // 🟢 DELETE CONFIRMATION DIALOG
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this entry? This cannot be undone.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["services"].delete { filter { eq("id", id) } }; servicesList = servicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }
@@ -221,7 +235,10 @@ fun ManageHomeServicesScreen(navController: NavController) {
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var serviceKeyInput by remember { mutableStateOf("") }
+
     var homeServicesList by remember { mutableStateOf<List<AdminHomeServiceModel>>(emptyList()) }
+    var itemToDelete by remember { mutableStateOf<AdminHomeServiceModel?>(null) } // 🟢 CONFIRMATION STATE
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -261,14 +278,30 @@ fun ManageHomeServicesScreen(navController: NavController) {
                             Text(service.title, fontWeight = FontWeight.Bold)
                             Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 12.sp)
                         }
-                        IconButton(onClick = {
-                            scope.launch {
-                                try { service.id?.let { id -> supabase.postgrest["home_services"].delete { filter { eq("id", id) } }; homeServicesList = homeServicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
-                            }
-                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                        IconButton(onClick = { itemToDelete = service }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
+        }
+
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this entry?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["home_services"].delete { filter { eq("id", id) } }; homeServicesList = homeServicesList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }
@@ -283,7 +316,10 @@ fun ManageNewsScreen(navController: NavController) {
     var shortContent by remember { mutableStateOf("") }
     var fullContent by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
+
     var newsList by remember { mutableStateOf<List<AdminNewsModel>>(emptyList()) }
+    var itemToDelete by remember { mutableStateOf<AdminNewsModel?>(null) } // 🟢 CONFIRMATION STATE
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -320,72 +356,66 @@ fun ManageNewsScreen(navController: NavController) {
                 Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                     Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) { Text(news.title, fontWeight = FontWeight.Bold); Text(news.tag, color = Color.Red, fontSize = 12.sp) }
-                        IconButton(onClick = {
-                            scope.launch { try { news.id?.let { id -> supabase.postgrest["news"].delete { filter { eq("id", id) } }; newsList = newsList.filter { it.id != id } } } catch (e: Exception) {} }
-                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                        IconButton(onClick = { itemToDelete = news }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
         }
+
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this news entry?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["news"].delete { filter { eq("id", id) } }; newsList = newsList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
+        }
     }
 }
 
-// 🟢 --- 5. VIEW FEEDBACK SCREEN (SMART UI FIX) ---
+// 🟢 --- 5. VIEW FEEDBACK SCREEN (NO DELETE BUTTON HERE, SO NO ALERT DIALOG NEEDED) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFeedbackScreen(navController: NavController) {
     var feedbackList by remember { mutableStateOf<List<FeedbackModel>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        try {
-            feedbackList = supabase.postgrest["feedback"].select().decodeList<FeedbackModel>()
-        } catch (e: Exception) {}
+        try { feedbackList = supabase.postgrest["feedback"].select().decodeList<FeedbackModel>() } catch (e: Exception) {}
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("User Feedback") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, "")
-                    }
-                }
-            )
-        }
+        topBar = { TopAppBar(title = { Text("User Feedback") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
             items(feedbackList) { feedback ->
-
-                // 🟢 Rating ke hisaab se Color Change Logic
                 val ratingColor = when {
-                    feedback.rating >= 4 -> Color(0xFF2E7D32) // Dark Green (Positive)
-                    feedback.rating == 3 -> Color(0xFFF57F17) // Orange (Neutral)
-                    else -> Color(0xFFD32F2F) // Red (Negative)
+                    feedback.rating >= 4 -> Color(0xFF2E7D32)
+                    feedback.rating == 3 -> Color(0xFFF57F17)
+                    else -> Color(0xFFD32F2F)
                 }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ) {
+                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Text(feedback.name, fontWeight = FontWeight.Bold, color = Indigo, fontSize = 16.sp)
-
-                            // ⭐ Star aur Rating number ek sath
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Outlined.Star, contentDescription = null, tint = ratingColor, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(4.dp))
                                 Text("${feedback.rating}/5", fontWeight = FontWeight.Bold, color = ratingColor)
                             }
                         }
-
-                        Text(feedback.email, color = Color.Gray, fontSize = 12.sp) // Email chota aur grey
+                        Text(feedback.email, color = Color.Gray, fontSize = 12.sp)
                         Spacer(Modifier.height(8.dp))
                         Text(feedback.message, fontSize = 14.sp)
                     }
@@ -402,7 +432,10 @@ fun ManageServiceLinksScreen(navController: NavController) {
     var serviceKey by remember { mutableStateOf("") }
     var buttonTitle by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
+
     var linksList by remember { mutableStateOf<List<ServiceLinkModel>>(emptyList()) }
+    var itemToDelete by remember { mutableStateOf<ServiceLinkModel?>(null) } // 🟢 CONFIRMATION STATE
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -440,12 +473,30 @@ fun ManageServiceLinksScreen(navController: NavController) {
                             Text(link.button_title, fontWeight = FontWeight.Bold)
                             Text("Key: ${link.service_key}", color = Color.Gray, fontSize = 12.sp)
                         }
-                        IconButton(onClick = {
-                            scope.launch { try { link.id?.let { id -> supabase.postgrest["service_links"].delete { filter { eq("id", id) } }; linksList = linksList.filter { it.id != id } } } catch (e: Exception) {} }
-                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                        IconButton(onClick = { itemToDelete = link }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
+        }
+
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this link?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["service_links"].delete { filter { eq("id", id) } }; linksList = linksList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }
@@ -457,7 +508,10 @@ fun ManageServiceInfoScreen(navController: NavController) {
     var serviceKey by remember { mutableStateOf("") }
     var heading by remember { mutableStateOf("") }
     var details by remember { mutableStateOf("") }
+
     var infoList by remember { mutableStateOf<List<ServiceInfoModel>>(emptyList()) }
+    var itemToDelete by remember { mutableStateOf<ServiceInfoModel?>(null) } // 🟢 CONFIRMATION STATE
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -501,12 +555,30 @@ fun ManageServiceInfoScreen(navController: NavController) {
                             Text(info.heading, fontWeight = FontWeight.Bold)
                             Text("Key: ${info.service_key}", color = Color.Gray, fontSize = 12.sp)
                         }
-                        IconButton(onClick = {
-                            scope.launch { try { info.id?.let { id -> supabase.postgrest["service_info"].delete { filter { eq("id", id) } }; infoList = infoList.filter { it.id != id } } } catch (e: Exception) {} }
-                        }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                        IconButton(onClick = { itemToDelete = info }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
+        }
+
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this intro detail?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["service_info"].delete { filter { eq("id", id) } }; infoList = infoList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
         }
     }
 }

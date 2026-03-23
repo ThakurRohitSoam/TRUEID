@@ -49,7 +49,7 @@ val offlineCategories = listOf(
     ServiceCategory("Important Documents", listOf(
         ServiceData("Aadhar Card", "Update demographic or biometric details in your Aadhar card.", Icons.Outlined.PersonPin, "aadhar"),
         ServiceData("PAN Card", "Apply for a new Permanent Account Number (PAN) card.", Icons.Outlined.WorkOutline, "pan"),
-        ServiceData("Driving License", "Apply for a new or renew your driving license.", Icons.Outlined.Badge, "dl"),
+        ServiceData("Driving Licence", "Apply for a new or renew your driving license.", Icons.Outlined.Badge, "dl"),
         ServiceData("Indian Passport", "Apply for a new Passport", Icons.Outlined.Work, "passport"),
         ServiceData("Voter Id", "Apply for a new Voter Id ", Icons.Outlined.HowToVote, "voter")
     )),
