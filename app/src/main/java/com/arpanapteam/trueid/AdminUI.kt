@@ -68,6 +68,19 @@ data class ServiceLinkModel(val id: Int? = null, val service_key: String, val bu
 @Serializable
 data class ServiceInfoModel(val id: Int? = null, val service_key: String, val heading: String, val details: String, val created_at: String? = null)
 
+// 🟢 NAYA MODEL TRAVEL SERVICES (Bus, Flight, Metro) KE LIYE
+@Serializable
+data class AdminTravelServiceModel(
+    val id: Int? = null,
+    val service_type: String,
+    val title: String,
+    val subtitle: String? = null,
+    val link_1: String? = null,
+    val link_2: String? = null,
+    val link_3: String? = null,
+    val link_4: String? = null
+)
+
 // --- 1. ADMIN LOGIN SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,6 +142,8 @@ fun AdminDashboardScreen(navController: NavController) {
         ) {
             AdminMenuCard("Manage Home Services", "Add special cards ONLY for Home Screen") { navController.navigate("manage_home_services") }
             AdminMenuCard("Manage Services", "Create Category & Add App Service Cards") { navController.navigate("manage_services") }
+            // 🟢 NAYA BUTTON TRAVEL SERVICES KE LIYE
+            AdminMenuCard("Manage Travel Services", "Add Bus, Flight, or Metro details") { navController.navigate("manage_travel_services") }
             AdminMenuCard("Manage News", "Post or delete news alerts") { navController.navigate("manage_news") }
             AdminMenuCard("Manage Inside Links", "Add inside buttons/links for inside pages.") { navController.navigate("manage_service_links") }
             AdminMenuCard("Manage Intro Info", "Add Introduction inside the page (e.g., What is Aadhaar?)") { navController.navigate("manage_service_info") }
@@ -159,7 +174,6 @@ fun ManageServicesScreen(navController: NavController) {
     var serviceKeyInput by remember { mutableStateOf("") }
 
     var servicesList by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
-    // 🟢 DELETE CONFIRMATION STATE
     var itemToDelete by remember { mutableStateOf<AdminServiceModel?>(null) }
 
     val scope = rememberCoroutineScope()
@@ -209,7 +223,6 @@ fun ManageServicesScreen(navController: NavController) {
             }
         }
 
-        // 🟢 DELETE CONFIRMATION DIALOG
         if (itemToDelete != null) {
             AlertDialog(
                 onDismissRequest = { itemToDelete = null },
@@ -241,7 +254,7 @@ fun ManageHomeServicesScreen(navController: NavController) {
     var serviceKeyInput by remember { mutableStateOf("") }
 
     var homeServicesList by remember { mutableStateOf<List<AdminHomeServiceModel>>(emptyList()) }
-    var itemToDelete by remember { mutableStateOf<AdminHomeServiceModel?>(null) } // 🟢 CONFIRMATION STATE
+    var itemToDelete by remember { mutableStateOf<AdminHomeServiceModel?>(null) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -322,7 +335,7 @@ fun ManageNewsScreen(navController: NavController) {
     var imageUrl by remember { mutableStateOf("") }
 
     var newsList by remember { mutableStateOf<List<AdminNewsModel>>(emptyList()) }
-    var itemToDelete by remember { mutableStateOf<AdminNewsModel?>(null) } // 🟢 CONFIRMATION STATE
+    var itemToDelete by remember { mutableStateOf<AdminNewsModel?>(null) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -388,7 +401,7 @@ fun ManageNewsScreen(navController: NavController) {
     }
 }
 
-// 🟢 --- 5. VIEW FEEDBACK SCREEN (NO DELETE BUTTON HERE, SO NO ALERT DIALOG NEEDED) ---
+// 🟢 --- 5. VIEW FEEDBACK SCREEN ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewFeedbackScreen(navController: NavController) {
@@ -438,7 +451,7 @@ fun ManageServiceLinksScreen(navController: NavController) {
     var url by remember { mutableStateOf("") }
 
     var linksList by remember { mutableStateOf<List<ServiceLinkModel>>(emptyList()) }
-    var itemToDelete by remember { mutableStateOf<ServiceLinkModel?>(null) } // 🟢 CONFIRMATION STATE
+    var itemToDelete by remember { mutableStateOf<ServiceLinkModel?>(null) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -514,7 +527,7 @@ fun ManageServiceInfoScreen(navController: NavController) {
     var details by remember { mutableStateOf("") }
 
     var infoList by remember { mutableStateOf<List<ServiceInfoModel>>(emptyList()) }
-    var itemToDelete by remember { mutableStateOf<ServiceInfoModel?>(null) } // 🟢 CONFIRMATION STATE
+    var itemToDelete by remember { mutableStateOf<ServiceInfoModel?>(null) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -576,6 +589,103 @@ fun ManageServiceInfoScreen(navController: NavController) {
                         itemToDelete = null
                         scope.launch {
                             try { target?.id?.let { id -> supabase.postgrest["service_info"].delete { filter { eq("id", id) } }; infoList = infoList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
+                        }
+                    }) { Text("Yes, Delete", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { itemToDelete = null }) { Text("Cancel") }
+                }
+            )
+        }
+    }
+}
+
+// 🟢 --- 9. MANAGE TRAVEL SERVICES (BUS, FLIGHT, METRO) ---
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ManageTravelServicesScreen(navController: NavController) {
+    var serviceType by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+    var subtitle by remember { mutableStateOf("") }
+    var link1 by remember { mutableStateOf("") }
+    var link2 by remember { mutableStateOf("") }
+    var link3 by remember { mutableStateOf("") }
+    var link4 by remember { mutableStateOf("") }
+
+    var travelList by remember { mutableStateOf<List<AdminTravelServiceModel>>(emptyList()) }
+    var itemToDelete by remember { mutableStateOf<AdminTravelServiceModel?>(null) }
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) { try { travelList = supabase.postgrest["travel_services"].select().decodeList<AdminTravelServiceModel>() } catch (e: Exception) {} }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Manage Travel Services") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
+        LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
+            item {
+                Text("Add New Travel Provider", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(value = serviceType, onValueChange = { serviceType = it }, label = { Text("Service Type (e.g. bus, metro, flight)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title (e.g. RedBus, Delhi Metro)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = subtitle, onValueChange = { subtitle = it }, label = { Text("Subtitle / City (optional, e.g. Delhi NCR)") }, modifier = Modifier.fillMaxWidth())
+
+                Spacer(Modifier.height(8.dp))
+                Text("URL Links (Leave empty if not needed):", fontSize = 14.sp, color = Color.Gray)
+                OutlinedTextField(value = link1, onValueChange = { link1 = it }, label = { Text("Link 1 (Website / App URL)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = link2, onValueChange = { link2 = it }, label = { Text("Link 2 (Booking URL)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = link3, onValueChange = { link3 = it }, label = { Text("Link 3 (Status / Web Checkin / WhatsApp)") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = link4, onValueChange = { link4 = it }, label = { Text("Link 4 (Extra App URL - Bus Only)") }, modifier = Modifier.fillMaxWidth())
+
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = {
+                    scope.launch {
+                        try {
+                            val newEntry = AdminTravelServiceModel(
+                                service_type = serviceType.lowercase(),
+                                title = title,
+                                subtitle = subtitle.ifEmpty { null },
+                                link_1 = link1.ifEmpty { null },
+                                link_2 = link2.ifEmpty { null },
+                                link_3 = link3.ifEmpty { null },
+                                link_4 = link4.ifEmpty { null }
+                            )
+                            supabase.postgrest["travel_services"].insert(newEntry)
+                            travelList = supabase.postgrest["travel_services"].select().decodeList<AdminTravelServiceModel>()
+                            serviceType = ""; title = ""; subtitle = ""; link1 = ""; link2 = ""; link3 = ""; link4 = ""
+                            Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) { Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
+                    }
+                }, modifier = Modifier.fillMaxWidth()) { Text("Add Service") }
+                Spacer(Modifier.height(24.dp))
+                Text("Existing Travel Services", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+            }
+
+            items(travelList) { item ->
+                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(item.title, fontWeight = FontWeight.Bold)
+                            Text("Type: ${item.service_type}", color = Indigo, fontSize = 12.sp)
+                        }
+                        IconButton(onClick = { itemToDelete = item }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
+                    }
+                }
+            }
+        }
+
+        if (itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { itemToDelete = null },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this entry?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val target = itemToDelete
+                        itemToDelete = null
+                        scope.launch {
+                            try { target?.id?.let { id -> supabase.postgrest["travel_services"].delete { filter { eq("id", id) } }; travelList = travelList.filter { it.id != id }; Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show() } } catch (e: Exception) {}
                         }
                     }) { Text("Yes, Delete", color = Color.Red) }
                 },

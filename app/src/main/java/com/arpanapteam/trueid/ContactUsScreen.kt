@@ -1,5 +1,7 @@
 package com.arpanapteam.trueid
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +26,9 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
+
+    // 🟢 Context add kiya Intent call karne ke liye
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -36,7 +43,7 @@ fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
                         Icon(
                             painter = painterResource(id = R.drawable.back),
                             contentDescription = "Back",
-                            modifier = Modifier.size(28.dp)   // ⬅️ Bigger Back Button
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
@@ -80,14 +87,24 @@ fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
                     iconRes = R.drawable.contact,
                     title = "Call us",
                     subtitle = "Our team is on the line\nMon–Fri • 9–17",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        // 🟢 Call Redirect Logic
+                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+911234567890")) // Apna number yahan dalein
+                        context.startActivity(intent)
+                    }
                 )
 
                 ContactTopCard(
                     iconRes = R.drawable.email,
                     title = "Email us",
                     subtitle = "Our team is online\nMon–Fri • 9–17",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        // 🟢 Email Redirect Logic
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:trueidsupport@gmail.com")) // Apna email yahan dalein
+                        context.startActivity(intent)
+                    }
                 )
             }
 
@@ -142,11 +159,14 @@ fun ContactTopCard(
     iconRes: Int,
     title: String,
     subtitle: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {} // 🟢 Naya onClick parameter add kiya
 ) {
     Column(
         modifier = modifier
-            .background(Color.White, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp)) // 🟢 Click ripple ko box ke andar rakhne ke liye clip
+            .background(Color.White)
+            .clickable { onClick() } // 🟢 Click functionality enable ki
             .padding(20.dp)
     ) {
 

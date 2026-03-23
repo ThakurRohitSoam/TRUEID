@@ -27,6 +27,8 @@ import com.arpanapteam.trueid.supabase
 import com.arpanapteam.trueid.ui.theme.Indigo
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
+import java.net.UnknownHostException // 🟢 Naya Import (Internet error pakadne ke liye)
+import java.net.ConnectException    // 🟢 Naya Import
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,7 +173,6 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                             isLoading = true
                             scope.launch {
                                 try {
-                                    // 🚀 SEPARATE COLUMNS MEIN DATA SAVE KAREIN
                                     val feedback = FeedbackModel(
                                         name = name.ifBlank { "Anonymous" },
                                         email = email,
@@ -181,12 +182,24 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                                     supabase.postgrest["feedback"].insert(feedback)
 
                                     isLoading = false
-                                    isSubmitted = true // Show Thank You UI
-                                } catch (e: Exception) {
+                                    isSubmitted = true
+                                } catch (e: UnknownHostException) {
+                                    // 🟢 SPECIAL CATCH: Internet band hone par (URL resolve nahi hota)
                                     isLoading = false
-                                    // 🟢 ASLI ERROR DEKHNE KE LIYE YEH LINE ADD KI:
-                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-                                    e.printStackTrace() // Logcat me error chhapne ke liye
+                                    Toast.makeText(context, "You are offline. Feedback could not be sent.", Toast.LENGTH_LONG).show()
+                                } catch (e: ConnectException) {
+                                    // 🟢 SPECIAL CATCH: Connection fail hone par
+                                    isLoading = false
+                                    Toast.makeText(context, "Connection failed. Please check your internet.", Toast.LENGTH_LONG).show()
+                                } catch (e: Exception) {
+                                    // 🟢 DUSRA KOI ERROR HUA TOH (Jaise database error)
+                                    isLoading = false
+                                    val errorMsg = e.message ?: "Unknown error"
+                                    if(errorMsg.contains("Unable to resolve host") || errorMsg.contains("No address associated")) {
+                                        Toast.makeText(context, "You are offline. Feedback could not be sent.", Toast.LENGTH_LONG).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to send: $errorMsg", Toast.LENGTH_LONG).show()
+                                    }
                                 }
                             }
                         }

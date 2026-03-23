@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.CloudOff // 🟢 CloudOff Icon Import
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
@@ -24,29 +25,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign // 🟢 TextAlign Import
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage // Naya Image loader internet ke liye
+import coil.compose.AsyncImage
+import com.arpanapteam.trueid.ui.theme.Indigo // 🟢 Indigo Color Import
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TextGray
-import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
-// MAIN NEWS LIST SCREEN
+// ==========================================
+// 📰 MAIN NEWS LIST SCREEN
+// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(navController: NavController) {
-    // Supabase se data store karne ke liye list
     var newsItems by remember { mutableStateOf<List<AdminNewsModel>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Screen khulte hi data fetch karo
-    LaunchedEffect(Unit) {
+    var isOffline by remember { mutableStateOf(false) } // 🟢 OFFLINE CHECKER
+    var retryTrigger by remember { mutableIntStateOf(0) } // 🟢 RETRY BUTTON KE LIYE
+
+    // Screen khulte hi ya Retry dabane par data fetch karo
+    LaunchedEffect(retryTrigger) {
+        isLoading = true
+        isOffline = false
         try {
             newsItems = supabase.postgrest["news"].select().decodeList<AdminNewsModel>()
         } catch (e: Exception) {
+            isOffline = true // 🟢 Error aane par offline set ho jayega
             println("Error fetching news: ${e.message}")
         } finally {
             isLoading = false
@@ -57,26 +66,30 @@ fun NewsScreen(navController: NavController) {
         topBar = { NewsTopAppBar(onBack = { navController.popBackStack() }) },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize(), contentAlignment = Alignment.Center) {
+
+            if (isLoading) {
+                CircularProgressIndicator(color = Indigo)
             }
-        } else if (newsItems.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No news available right now.")
+            // 🟢 AGAR NET BAND HAI TOH YEH DIKHEGA
+            else if (isOffline) {
+                OfflineUI { retryTrigger++ }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.padding(paddingValues).fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Ab loop local list par nahi, Supabase wali list par chalega
-                items(newsItems) { article ->
-                    NewsCard(
-                        article = article,
-                        onReadMore = { navController.navigate("news_detail/${article.id}") }
-                    )
+            else if (newsItems.isEmpty()) {
+                Text("No news available right now.", color = Color.Gray)
+            }
+            else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(newsItems) { article ->
+                        NewsCard(
+                            article = article,
+                            onReadMore = { navController.navigate("news_detail/${article.id}") }
+                        )
+                    }
                 }
             }
         }
@@ -98,15 +111,15 @@ fun NewsTopAppBar(onBack: () -> Unit) {
     )
 }
 
-// SINGLE NEWS CARD
+// ==========================================
+// 🃏 SINGLE NEWS CARD
+// ==========================================
 @Composable
 fun NewsCard(
     article: AdminNewsModel,
     onReadMore: () -> Unit
 ) {
     val context = LocalContext.current
-
-    // Tag ka color red hona chahiye ya green, tag ke naam par depend karega
     val tagColor = if (article.tag.contains("Alert", ignoreCase = true)) Color.Red else Color(0xFF2E7D32)
 
     AnimatedVisibility(
@@ -116,15 +129,13 @@ fun NewsCard(
         Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
 
-                // Tag + date row
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(tagColor.copy(alpha = 0.1f)).padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
+                    Box(modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(tagColor.copy(alpha = 0.1f)).padding(horizontal = 8.dp, vertical = 4.dp)) {
                         Text(text = article.tag, color = tagColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -133,17 +144,13 @@ fun NewsCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Title + image
                 Row(verticalAlignment = Alignment.Top) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = article.title, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(text = article.short_content, color = TextGray, fontSize = 14.sp)
                     }
-
                     Spacer(modifier = Modifier.width(16.dp))
-
-                    // COIL ASYNC IMAGE - INTERNET SE IMAGE LOAD HOGI
                     AsyncImage(
                         model = article.image_url,
                         contentDescription = article.title,
@@ -154,7 +161,6 @@ fun NewsCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Share + Read More buttons
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     OutlinedButton(onClick = {
                         val shareText = "TRUEID NEWS\n\nTitle: ${article.title}\nDate: ${article.date}\n\nRead more in the TRUEID app."
@@ -165,10 +171,8 @@ fun NewsCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Share")
                     }
-
                     Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(onClick = onReadMore) {
+                    Button(onClick = onReadMore, colors = ButtonDefaults.buttonColors(containerColor = Indigo)) {
                         Text("Read More")
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(Icons.AutoMirrored.Outlined.ArrowForward, "Read More", modifier = Modifier.size(16.dp))
@@ -179,7 +183,9 @@ fun NewsCard(
     }
 }
 
-// DETAIL SCREEN (Read More -> opens this)
+// ==========================================
+// 📖 DETAIL SCREEN (Read More -> opens this)
+// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsDetailScreen(
@@ -189,48 +195,88 @@ fun NewsDetailScreen(
     var article by remember { mutableStateOf<AdminNewsModel?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(newsId) {
+    var isOffline by remember { mutableStateOf(false) } // 🟢 OFFLINE CHECKER
+    var retryTrigger by remember { mutableIntStateOf(0) } // 🟢 RETRY BUTTON KE LIYE
+
+    LaunchedEffect(newsId, retryTrigger) {
+        isLoading = true
+        isOffline = false
         try {
-            // Find specific news by ID
             val result = supabase.postgrest["news"].select { filter { eq("id", newsId) } }.decodeList<AdminNewsModel>()
             article = result.firstOrNull()
-        } catch (e: Exception) { } finally { isLoading = false }
+        } catch (e: Exception) {
+            isOffline = true // 🟢 Error aane par offline set ho jayega
+        } finally {
+            isLoading = false
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(article?.title ?: "Loading...", maxLines = 1) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") } }
+                title = { Text(article?.title ?: "News Detail", maxLines = 1, fontWeight = FontWeight.Bold) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Back") } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
-        }
+        },
+        containerColor = Color.White
     ) { padding ->
-        if (isLoading) {
-            Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        } else if (article == null) {
-            Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) { Text("Article not found.") }
-        } else {
-            Column(modifier = Modifier.padding(padding).fillMaxSize().padding(16.dp)) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
 
-                // COIL ASYNC IMAGE FOR DETAIL SCREEN
-                AsyncImage(
-                    model = article!!.image_url,
-                    contentDescription = article!!.title,
-                    modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val tagColor = if (article!!.tag.contains("Alert", ignoreCase = true)) Color.Red else Color(0xFF2E7D32)
-                Text(text = article!!.tag.uppercase(), color = tagColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = article!!.date, color = TextGray, fontSize = 12.sp)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(text = article!!.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(text = article!!.full_content, fontSize = 15.sp, lineHeight = 22.sp)
+            if (isLoading) {
+                CircularProgressIndicator(color = Indigo)
             }
+            // 🟢 AGAR NET BAND HAI TOH YEH DIKHEGA
+            else if (isOffline) {
+                OfflineUI { retryTrigger++ }
+            }
+            else if (article == null) {
+                Text("Article not found.", color = Color.Gray)
+            }
+            else {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    AsyncImage(
+                        model = article!!.image_url,
+                        contentDescription = article!!.title,
+                        modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val tagColor = if (article!!.tag.contains("Alert", ignoreCase = true)) Color.Red else Color(0xFF2E7D32)
+                    Text(text = article!!.tag.uppercase(), color = tagColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = article!!.date, color = TextGray, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(text = article!!.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(text = article!!.full_content, fontSize = 15.sp, lineHeight = 22.sp, color = Color(0xFF202020))
+                }
+            }
+        }
+    }
+}
+
+// ==========================================
+// ☁️ OFFLINE UI COMPONENT
+// ==========================================
+@Composable
+fun OfflineUI(onRetry: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+        Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(80.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Oops! You are offline", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Please connect to the internet to view latest news.", color = Color.Gray, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onRetry,
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Indigo),
+            modifier = Modifier.height(50.dp).padding(horizontal = 32.dp)
+        ) {
+            Text("Retry", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

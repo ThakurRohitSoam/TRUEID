@@ -146,7 +146,7 @@ fun AppDrawer(
 
                 Column {
                     Text("TRUEID", fontWeight = FontWeight.Bold, color = Color.Black)
-                    Text("trueid@gmail.com", fontSize = 12.sp, color = Color.Gray)
+                    Text("trueidsupport@gmail.com", fontSize = 12.sp, color = Color.Gray)
                 }
             }
         }

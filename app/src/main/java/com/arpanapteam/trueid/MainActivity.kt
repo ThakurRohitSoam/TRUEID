@@ -195,6 +195,7 @@ fun MainAppUI(
                 composable("flight") { DynamicServiceScreen(navController, "flight", "Flight Booking") }
                 composable("metro") { DynamicServiceScreen(navController, "metro", "Metro Services") }
                 composable("bus") { DynamicServiceScreen(navController, "bus", "Bus Ticket Booking") }
+                composable("manage_travel_services") { ManageTravelServicesScreen(navController = navController) }
 
                 // 🚀 THE MASTER ROUTE FOR NEW DYNAMIC SERVICES
                 composable(
@@ -230,15 +231,21 @@ fun TrueIdBottomBar(navController: NavController) {
             NavigationBarItem(
                 selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
+                    // 🟢 YAHAN FIX HAI: SaveState = false taaki fresh page khule
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId){ saveState = true }
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = false
+                        }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 label = { Text(item.label, fontSize = 12.sp) },
                 icon = { Icon(item.icon, item.label) },
-                colors = NavigationBarItemDefaults.colors(selectedIconColor = Indigo, selectedTextColor = Indigo, indicatorColor = OffWhite)
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Indigo,
+                    selectedTextColor = Indigo,
+                    indicatorColor = OffWhite
+                )
             )
         }
     }

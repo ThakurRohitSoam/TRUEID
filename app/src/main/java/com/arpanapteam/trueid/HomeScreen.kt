@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures // 🟢 Naya import gesture ke liye
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput // 🟢 Naya import pointer input ke liye
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -190,6 +192,7 @@ fun TrueIdTopAppBar(
 ) {
     var tapCount by remember { mutableIntStateOf(0) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
+    val context = LocalContext.current // 🟢 Context for Toast
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -221,21 +224,30 @@ fun TrueIdTopAppBar(
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        val currentTime = System.currentTimeMillis()
-                        if (currentTime - lastTapTime < 500) {
-                            tapCount++
-                            if (tapCount >= 5) {
-                                tapCount = 0
-                                navController.navigate("admin_login")
+                    // 🟢 YAHAN HAI SECRET AGENT WALA LOGIC (5 Clicks + 1 Hold)
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                val currentTime = System.currentTimeMillis()
+                                if (currentTime - lastTapTime < 600) {
+                                    tapCount++
+                                } else {
+                                    tapCount = 1
+                                }
+                                lastTapTime = currentTime
+                            },
+                            onLongPress = {
+                                val currentTime = System.currentTimeMillis()
+                                // Check if 5 taps happened and the long press is immediate
+                                if (tapCount >= 5 && (currentTime - lastTapTime) < 1000) {
+                                    Toast.makeText(context, "Admin Access Granted 🕵️‍♂️", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("admin_login")
+                                    tapCount = 0
+                                } else {
+                                    tapCount = 0
+                                }
                             }
-                        } else {
-                            tapCount = 1
-                        }
-                        lastTapTime = currentTime
+                        )
                     }
                 ) {
                     Icon(Icons.Outlined.VerifiedUser, null, tint = Indigo)
