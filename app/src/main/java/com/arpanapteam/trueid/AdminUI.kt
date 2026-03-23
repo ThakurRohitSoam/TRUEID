@@ -30,13 +30,14 @@ import kotlinx.serialization.Serializable
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import com.arpanapteam.trueid.BuildConfig
 
 // ==========================================
-// 🔴 IMPORTANT: PUT YOUR SUPABASE DETAILS HERE
+// 🔴 IMPORTANT: HIDDEN KEYS INTEGRATED
 // ==========================================
 val supabase = createSupabaseClient(
-    supabaseUrl = "https://iwlzrddbihvvzxhghgrt.supabase.co", // <-- Apna poora URL yahan daalein
-    supabaseKey = "sb_publishable_PseXbACWYTS-Z8HrvAuflg_-AEFPHCR"    // <-- Apni poori key yahan daalein
+    supabaseUrl = BuildConfig.SUPABASE_URL, // 🟢 Hidden URL
+    supabaseKey = BuildConfig.SUPABASE_KEY  // 🟢 Hidden Key
 ) {
     install(Postgrest)
 }
@@ -98,10 +99,13 @@ fun AdminLoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    if (email == "admin@gmail.com" && password == "123456") {
+                    // 🟢 Hidden Admin Details se check karega
+                    if (email == BuildConfig.ADMIN_EMAIL && password == BuildConfig.ADMIN_PASSWORD) {
                         errorMessage = ""
                         navController.navigate("admin_dashboard") { popUpTo("admin_login") { inclusive = true } }
-                    } else { errorMessage = "Invalid credentials. Unauthorized access." }
+                    } else {
+                        errorMessage = "Invalid credentials. Unauthorized access."
+                    }
                 }, modifier = Modifier.fillMaxWidth().height(50.dp)
             ) { Text("Login") }
         }

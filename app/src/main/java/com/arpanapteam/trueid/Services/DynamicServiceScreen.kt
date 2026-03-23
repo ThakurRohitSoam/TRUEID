@@ -2,6 +2,8 @@ package com.arpanapteam.trueid.Services
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast // 🟢 Toast ke liye import
+import androidx.browser.customtabs.CustomTabsIntent // 🟢 Custom Tabs (App ke andar Chrome) ke liye import
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -145,7 +147,22 @@ fun DynamicServiceScreen(
                                 )
                                 Spacer(Modifier.height(16.dp))
                                 Button(
-                                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link.url))) },
+                                    onClick = {
+                                        try {
+                                            // 🟢 NAYA TARIQA: App ke andar website kholne ke liye (Custom Tabs)
+                                            val builder = CustomTabsIntent.Builder()
+                                            builder.setShowTitle(true) // Website ka naam upar dikhayega
+                                            val customTabsIntent = builder.build()
+
+                                            // Ye line website ko app ke andar ek overlay mein khol degi
+                                            customTabsIntent.launchUrl(context, Uri.parse(link.url))
+
+                                        } catch (e: Exception) {
+                                            // Agar Custom Tabs fail hua (jese purane phones me), toh browser mein khulega
+                                            Toast.makeText(context, "Opening link...", Toast.LENGTH_SHORT).show()
+                                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link.url)))
+                                        }
+                                    },
                                     modifier = Modifier.fillMaxWidth().height(48.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = Indigo)

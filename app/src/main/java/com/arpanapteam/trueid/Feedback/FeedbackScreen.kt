@@ -184,7 +184,9 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                                     isSubmitted = true // Show Thank You UI
                                 } catch (e: Exception) {
                                     isLoading = false
-                                    Toast.makeText(context, "Failed to send feedback", Toast.LENGTH_SHORT).show()
+                                    // 🟢 ASLI ERROR DEKHNE KE LIYE YEH LINE ADD KI:
+                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                    e.printStackTrace() // Logcat me error chhapne ke liye
                                 }
                             }
                         }
