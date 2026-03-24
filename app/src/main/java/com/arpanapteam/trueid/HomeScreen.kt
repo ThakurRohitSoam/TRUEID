@@ -240,7 +240,7 @@ fun TrueIdTopAppBar(
                                 val currentTime = System.currentTimeMillis()
                                 // Check if 5 taps happened and the long press is immediate
                                 if (tapCount >= 5 && (currentTime - lastTapTime) < 1000) {
-                                    Toast.makeText(context, "Admin Access Granted 🕵️‍♂️", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Admin Access Granted", Toast.LENGTH_SHORT).show()
                                     navController.navigate("admin_login")
                                     tapCount = 0
                                 } else {

@@ -148,7 +148,8 @@ fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
             SocialItem(
                 icon = R.drawable.facebook,
                 title = "Facebook",
-                subtitle = "0 Followers • 0 Posts"
+                subtitle = "0 Followers • 0 Posts",
+                url = "https://www.facebook.com/share/1G6jDWh17w/"
             )
         }
     }
