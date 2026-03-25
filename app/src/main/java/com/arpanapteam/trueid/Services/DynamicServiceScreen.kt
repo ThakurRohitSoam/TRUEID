@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material.icons.outlined.Flight
+import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Train
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,7 +51,7 @@ data class TravelServiceModel(
     val link_4: String? = null
 )
 
-// --- PURANE UI DATA CLASSES (Ab Data inme aayega Database se) ---
+// --- PURANE UI DATA CLASSES ---
 data class BusInfo(val name: String, val website: String, val booking: String, val status: String, val app: String)
 data class AirlineInfo(val name: String, val website: String, val booking: String, val checkin: String)
 data class MetroInfo(val name: String, val city: String, val appLink: String? = null, val whatsapp: String? = null)
@@ -62,8 +63,6 @@ fun DynamicServiceScreen(navController: NavController, serviceKey: String, pageT
     val context = LocalContext.current
     var links by remember { mutableStateOf<List<ServiceLinkModel>>(emptyList()) }
     var serviceInfo by remember { mutableStateOf<ServiceInfoModel?>(null) }
-
-    // 🟢 NAYA STATE: Travel data ke liye
     var travelData by remember { mutableStateOf<List<TravelServiceModel>>(emptyList()) }
 
     var isLoading by remember { mutableStateOf(true) }
@@ -84,7 +83,7 @@ fun DynamicServiceScreen(navController: NavController, serviceKey: String, pageT
             val allLinks = supabase.postgrest["service_links"].select().decodeList<ServiceLinkModel>()
             links = allLinks.filter { calculateSimilarityPercentage(it.service_key.trim().lowercase().replace(" ", "").replace("_", ""), safeSearchKey) >= 80.0 }
 
-            // 🟢 NAYA FETCH: Travel Services uthao
+            // Travel Services uthao
             if (safeSearchKey.contains("bus") || safeSearchKey.contains("metro") || safeSearchKey.contains("flight") || safeSearchKey.contains("airline")) {
                 travelData = supabase.postgrest["travel_services"].select().decodeList<TravelServiceModel>()
             }
@@ -110,6 +109,15 @@ fun DynamicServiceScreen(navController: NavController, serviceKey: String, pageT
                 CircularProgressIndicator(color = Indigo)
             } else if (isOffline) {
                 OfflineUI { retryTrigger++ }
+            } else if (links.isEmpty() && serviceInfo == null && travelData.isEmpty() && !safeSearchKey.contains("railway")) {
+                // 🟢 EMPTY STATE: Agar koi data na mile toh blank screen ki jagah ye dikhega
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                    Icon(Icons.Outlined.HourglassEmpty, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Updating Services...", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("We are adding links for $pageTitle. Please check back later.", color = Color.Gray, textAlign = TextAlign.Center)
+                }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
@@ -125,7 +133,7 @@ fun DynamicServiceScreen(navController: NavController, serviceKey: String, pageT
                         }
                     }
 
-                    // 🟢 MAPPING DATABASE TO AWESOME UI
+                    // MAPPING DATABASE TO AWESOME UI
                     item {
                         when {
                             safeSearchKey.contains("bus") -> {
@@ -147,12 +155,12 @@ fun DynamicServiceScreen(navController: NavController, serviceKey: String, pageT
                                 FlightSection(flightList)
                             }
                             safeSearchKey.contains("railway") || safeSearchKey.contains("train") -> {
-                                RailwaySection() // Railway ke links pehle jese 'service_links' se hi control ho jayenge (items(links) me dikh jayega)
+                                RailwaySection()
                             }
                         }
                     }
 
-                    // REGULAR LINKS (Aadhar wagera ke liye)
+                    // REGULAR LINKS
                     items(links) { link ->
                         ActionRowListStyle(title = link.button_title) { safeOpenUrl(context, link.url) }
                     }
@@ -281,13 +289,12 @@ fun MetroSection(metros: List<MetroInfo>) {
 }
 
 // ==============================================================
-// 🚂 RAILWAY SECTION (Already handled by generic Links above, kept for placeholder)
+// 🚂 RAILWAY SECTION
 // ==============================================================
 @Composable
 fun RailwaySection() {
-    // Railway ke links normal "links" list se hi aa jayenge ab!
+    // Railway ke links normal "links" list se hi aa jayenge
 }
-
 
 // ==============================================================
 // 🛠 REUSABLE UI COMPONENTS & HELPERS
@@ -304,7 +311,7 @@ fun DetailViewLayout(title: String, onBack: () -> Unit, content: @Composable Col
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Indigo)
             }
-            Divider(color = Color.LightGray)
+            HorizontalDivider(color = Color.LightGray) // 🟢 FIXED: Divider() is replaced by HorizontalDivider()
             content()
         }
     }

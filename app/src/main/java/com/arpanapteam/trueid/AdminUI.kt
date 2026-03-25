@@ -1,6 +1,7 @@
 package com.arpanapteam.trueid
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,7 +69,6 @@ data class ServiceLinkModel(val id: Int? = null, val service_key: String, val bu
 @Serializable
 data class ServiceInfoModel(val id: Int? = null, val service_key: String, val heading: String, val details: String, val created_at: String? = null)
 
-// 🟢 NAYA MODEL TRAVEL SERVICES (Bus, Flight, Metro) KE LIYE
 @Serializable
 data class AdminTravelServiceModel(
     val id: Int? = null,
@@ -112,7 +112,6 @@ fun AdminLoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    // 🟢 Hidden Admin Details se check karega
                     if (email == BuildConfig.ADMIN_EMAIL && password == BuildConfig.ADMIN_PASSWORD) {
                         errorMessage = ""
                         navController.navigate("admin_dashboard") { popUpTo("admin_login") { inclusive = true } }
@@ -142,7 +141,6 @@ fun AdminDashboardScreen(navController: NavController) {
         ) {
             AdminMenuCard("Manage Home Services", "Add special cards ONLY for Home Screen") { navController.navigate("manage_home_services") }
             AdminMenuCard("Manage Services", "Create Category & Add App Service Cards") { navController.navigate("manage_services") }
-            // 🟢 NAYA BUTTON TRAVEL SERVICES KE LIYE
             AdminMenuCard("Manage Travel Services", "Add Bus, Flight, or Metro details") { navController.navigate("manage_travel_services") }
             AdminMenuCard("Manage News", "Post or delete news alerts") { navController.navigate("manage_news") }
             AdminMenuCard("Manage Inside Links", "Add inside buttons/links for inside pages.") { navController.navigate("manage_service_links") }
@@ -164,7 +162,7 @@ fun AdminMenuCard(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
-// --- 3. MANAGE SERVICES SCREEN ---
+// 🟢 --- 3. MANAGE SERVICES SCREEN (UPGRADED NEW UI) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageServicesScreen(navController: NavController) {
@@ -172,6 +170,7 @@ fun ManageServicesScreen(navController: NavController) {
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var serviceKeyInput by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     var servicesList by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
     var itemToDelete by remember { mutableStateOf<AdminServiceModel?>(null) }
@@ -181,46 +180,100 @@ fun ManageServicesScreen(navController: NavController) {
 
     LaunchedEffect(Unit) { try { servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() } catch (e: Exception) {} }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Create Service Card") }, navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } }) }) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding).padding(16.dp)) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Create Service Card", fontWeight = FontWeight.Medium) },
+                navigationIcon = { IconButton(onClick = { navController.popBackStack() }) { Icon(Icons.Default.ArrowBack, "") } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+            )
+        },
+        containerColor = Color.White
+    ) { padding ->
+        LazyColumn(modifier = Modifier.padding(padding).padding(horizontal = 20.dp)) {
             item {
-                Text("Add New Service Card", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Spacer(Modifier.height(8.dp))
-
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Card Title (e.g. Health Card)") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Card Description") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = category, onValueChange = { category = it }, label = { Text("Category (e.g. Medical Services)") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = serviceKeyInput, onValueChange = { serviceKeyInput = it }, label = { Text("Service Key (e.g. health_card)") }, modifier = Modifier.fillMaxWidth())
-
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Add New Service Card", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = {
-                    scope.launch {
-                        try {
-                            val newService = AdminServiceModel(title = title, description = description, category = category.ifEmpty { "New Updates" }, service_key = serviceKeyInput)
-                            supabase.postgrest["services"].insert(newService)
-                            servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>()
-                            title = ""; description = ""; category = ""; serviceKeyInput = ""
-                            Toast.makeText(context, "Card Created Successfully!", Toast.LENGTH_SHORT).show()
-                        } catch (e: Exception) { Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
-                    }
-                }, modifier = Modifier.fillMaxWidth()) { Text("Add Card to App") }
+
+                OutlinedTextField(
+                    value = title, onValueChange = { title = it },
+                    placeholder = { Text("Card Title (e.g. Health Card)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp), singleLine = true
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = description, onValueChange = { description = it },
+                    placeholder = { Text("Card Description") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = category, onValueChange = { category = it },
+                    placeholder = { Text("Category (e.g. Medical Services)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp), singleLine = true
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = serviceKeyInput, onValueChange = { serviceKeyInput = it },
+                    placeholder = { Text("Service Key (e.g. health_card)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp), singleLine = true
+                )
+
                 Spacer(Modifier.height(24.dp))
-                Text("Existing Cards", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Button(
+                    onClick = {
+                        if (title.isNotBlank() && category.isNotBlank() && serviceKeyInput.isNotBlank()) {
+                            scope.launch {
+                                isLoading = true
+                                try {
+                                    val newService = AdminServiceModel(title = title.trim(), description = description.trim(), category = category.trim(), service_key = serviceKeyInput.trim().lowercase())
+                                    supabase.postgrest["services"].insert(newService)
+                                    servicesList = supabase.postgrest["services"].select().decodeList<AdminServiceModel>()
+                                    title = ""; description = ""; category = ""; serviceKeyInput = ""
+                                    Toast.makeText(context, "Card Created Successfully!", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) { Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show() }
+                                finally { isLoading = false }
+                            }
+                        } else {
+                            Toast.makeText(context, "Please fill required fields", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Indigo),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    else Text("Add Card to App", fontSize = 16.sp, color = Color.White)
+                }
+
+                Spacer(Modifier.height(32.dp))
+                Text("Existing Cards", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
                 Spacer(Modifier.height(8.dp))
             }
 
             items(servicesList) { service ->
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))) {
                     Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(service.title, fontWeight = FontWeight.Bold)
-                            Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 12.sp)
-                            Text("Key: ${service.service_key}", color = Indigo, fontSize = 12.sp)
+                            Text(service.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text("Category: ${service.category ?: "New Updates"}", color = Color.Gray, fontSize = 13.sp)
+                            Text("Key: ${service.service_key}", color = Indigo, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                         }
                         IconButton(onClick = { itemToDelete = service }) { Icon(Icons.Default.Delete, "Delete", tint = Color.Red) }
                     }
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
 
         if (itemToDelete != null) {

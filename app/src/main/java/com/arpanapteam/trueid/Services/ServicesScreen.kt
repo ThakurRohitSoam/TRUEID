@@ -32,15 +32,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.arpanapteam.trueid.AdminServiceModel
+import com.arpanapteam.trueid.AdminTravelServiceModel
 import com.arpanapteam.trueid.supabase
 import com.arpanapteam.trueid.ui.theme.TRUEIDTheme
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.TextGray
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.launch
 
 // ==========================================
-// 1. OFFLINE DATA (AAPKI 30 SERVICES YAHAN SAFE HAIN)
+// 1. OFFLINE DATA
 // ==========================================
 data class ServiceData(val title: String, val description: String, val icon: ImageVector, val route: String?, val urlKey: String? = null)
 data class ServiceCategory(val name: String, val items: List<ServiceData>)
@@ -94,39 +96,90 @@ val offlineCategories = listOf(
 // ==========================================
 // 2. MAIN SCREEN LOGIC
 // ==========================================
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServicesScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf<ServiceCategory?>(null) }
 
     var onlineUpdates by remember { mutableStateOf<List<AdminServiceModel>>(emptyList()) }
+    var travelUpdates by remember { mutableStateOf<List<AdminTravelServiceModel>>(emptyList()) }
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        try { onlineUpdates = supabase.postgrest["services"].select().decodeList<AdminServiceModel>() }
-        catch (e: Exception) {}
-    }
-
-    // 🟢 Category-wise Group karna aur service_key (urlKey) setup karna
-    val dynamicCategories = remember(onlineUpdates) {
-        onlineUpdates.groupBy { it.category ?: "New Services" }.map { (catName, services) ->
-            ServiceCategory(
-                name = catName,
-                items = services.map { adminService ->
-                    ServiceData(
-                        title = adminService.title,
-                        description = adminService.description,
-                        icon = Icons.Outlined.Apps,
-                        route = null,
-                        urlKey = adminService.service_key // ✅ Updated to match the clean model
-                    )
-                }
-            )
+        scope.launch {
+            try {
+                onlineUpdates = supabase.postgrest["services"].select().decodeList<AdminServiceModel>()
+                travelUpdates = supabase.postgrest["travel_services"].select().decodeList<AdminTravelServiceModel>()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    // ✅ FIX: Offline pehle, uske baad online naye categories
-    val allCategoriesList = offlineCategories + dynamicCategories
+    // ✅ PRO FIX: SMART MERGING LOGIC
+    val allCategoriesList = remember(onlineUpdates, travelUpdates) {
+        val mergedMap = mutableMapOf<String, MutableList<ServiceData>>()
+
+        // 1. Offline categories ko map mein daalo
+        offlineCategories.forEach { category ->
+            mergedMap[category.name] = category.items.toMutableList()
+        }
+
+        // 2. Travel updates ko smart tarike se merge karo
+        if (travelUpdates.isNotEmpty()) {
+            val travelKey = mergedMap.keys.firstOrNull { it.equals("Travel & Ticket Bookings", ignoreCase = true) } ?: "Travel & Ticket Bookings"
+            val travelList = mergedMap.getOrPut(travelKey) { mutableListOf() }
+
+            travelUpdates.forEach { travel ->
+                travelList.add(
+                    ServiceData(
+                        title = travel.title,
+                        description = travel.subtitle ?: "Travel Provider",
+                        icon = Icons.Outlined.CardTravel,
+                        route = null,
+                        urlKey = travel.service_type
+                    )
+                )
+            }
+        }
+
+        // 3. General Online Services ko sahi category mein dalo
+        onlineUpdates.forEach { adminService ->
+            val rawCatName = adminService.category?.trim()
+            val catName = if (rawCatName.isNullOrEmpty()) "New Services" else rawCatName
+
+            // Check karega ki same naam ki heading majood hai kya
+            val existingKey = mergedMap.keys.firstOrNull { it.equals(catName, ignoreCase = true) } ?: catName
+
+            val list = mergedMap.getOrPut(existingKey) { mutableListOf() }
+            list.add(
+                ServiceData(
+                    title = adminService.title,
+                    description = adminService.description,
+                    icon = Icons.Outlined.Apps,
+                    route = null,
+                    urlKey = adminService.service_key
+                )
+            )
+        }
+
+        // 4. Sequence maintain karte hue final list banao
+        val finalList = mutableListOf<ServiceCategory>()
+        offlineCategories.forEach { offlineCat ->
+            mergedMap[offlineCat.name]?.let { items ->
+                finalList.add(ServiceCategory(offlineCat.name, items))
+                mergedMap.remove(offlineCat.name)
+            }
+        }
+
+        // Bachi hui (bilkul nayi) categories last me add hongi
+        mergedMap.forEach { (name, items) ->
+            finalList.add(ServiceCategory(name, items))
+        }
+
+        finalList
+    }
 
     // --- VIEW ALL PAGE LOGIC ---
     val category = selectedCategory
@@ -231,10 +284,8 @@ fun ServiceItemCard(service: ServiceData, navController: NavHostController) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable {
             if (service.route != null) {
-                // Offline service (e.g. "aadhar", "pan")
                 navController.navigate(service.route)
             } else if (service.urlKey != null) {
-                // Online service -> Sirf Dynamic Page Khulega service_key (urlKey) ka use karke
                 if (service.urlKey.startsWith("http")) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(service.urlKey))
                     context.startActivity(intent)
@@ -268,4 +319,3 @@ fun ServicesScreenPreview() {
         ServicesScreen(rememberNavController())
     }
 }
-

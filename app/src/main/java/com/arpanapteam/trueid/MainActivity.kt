@@ -168,7 +168,7 @@ fun MainAppUI(
                 composable("income_certificate") { DynamicServiceScreen(navController, "income_certificate", "Income Certificate") }
                 composable("domicile") { DynamicServiceScreen(navController, "domicile", "Domicile Certificate") }
                 composable("caste") { DynamicServiceScreen(navController, "caste", "Caste Certificate") }
-                composable("ration") { DynamicServiceScreen(navController, "ration", "Ration Card") }
+                composable("ration") { DynamicServiceScreen(navController, "rationcard", "Ration Card") }
                 composable("family") { DynamicServiceScreen(navController, "family", "Family ID") }
 
                 // Schemes & Scholarship
