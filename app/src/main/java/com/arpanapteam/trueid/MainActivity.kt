@@ -7,13 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.padding
-
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
 
 import androidx.compose.material3.*
@@ -101,7 +100,7 @@ fun MainAppUI(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = isDrawerGestureEnabled, // ✅ DRAWER FIX APPLIED
+        gesturesEnabled = isDrawerGestureEnabled,
         drawerContent = {
             AppDrawer(
                 navController,
@@ -114,7 +113,7 @@ fun MainAppUI(
         Scaffold(
             contentWindowInsets = WindowInsets(0,0,0,0),
             bottomBar = {
-                // ✅ ADMIN PANEL LOCK (Bottom bar tabhi dikhega jab admin panel mein na ho)
+                // ✅ ADMIN PANEL LOCK
                 if (showBottomBar) {
                     TrueIdBottomBar(navController)
                 }
@@ -131,6 +130,10 @@ fun MainAppUI(
                 composable("services") { ServicesScreen(navController) }
                 composable("news") { NewsScreen(navController) }
                 composable("feedback") { MultiStepFeedbackScreen({ navController.popBackStack() }, { navController.popBackStack() }) }
+
+                // 🟢 NAYA ROUTE: MY VAULT (Ab iski apni alag file hai)
+                composable("my_vault") { MyVaultScreen(navController) }
+
                 composable("about") { AboutScreen(navController) }
                 composable("terms") { TermsAndConditionsScreen(navController) }
                 composable("contact") { ContactUsScreen(navController = navController, onBack = { navController.popBackStack() }) }
@@ -219,6 +222,8 @@ fun TrueIdBottomBar(navController: NavController) {
     val items = listOf(
         BottomNavItem("Home", Icons.Outlined.Home, "home"),
         BottomNavItem("Services", Icons.Outlined.Apps, "services"),
+        // 🟢 NAYA BUTTON ADD KIYA HAI YAHAN
+        BottomNavItem("My Vault", Icons.Outlined.Folder, "my_vault"),
         BottomNavItem("News", Icons.AutoMirrored.Outlined.Article, "news"),
         BottomNavItem("Feedback", Icons.Outlined.Feedback, "feedback")
     )
@@ -231,7 +236,6 @@ fun TrueIdBottomBar(navController: NavController) {
             NavigationBarItem(
                 selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
-                    // 🟢 YAHAN FIX HAI: SaveState = false taaki fresh page khule
                     navController.navigate(item.route) {
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = false
@@ -239,7 +243,7 @@ fun TrueIdBottomBar(navController: NavController) {
                         launchSingleTop = true
                     }
                 },
-                label = { Text(item.label, fontSize = 12.sp) },
+                label = { Text(item.label, fontSize = 11.sp) }, // Thoda chota kiya taaki 5 fit ho jaye
                 icon = { Icon(item.icon, item.label) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Indigo,
