@@ -512,9 +512,7 @@ fun VaultItemCard(item: VaultRecord, onClick: () -> Unit) {
     }
 }
 
-// ==========================================
-// 🟢 NATIVE IN-APP PDF VIEWER COMPONENT
-// ==========================================
+//  NATIVE IN-APP PDF VIEWER COMPONENT
 @Composable
 fun InAppPdfViewer(uri: Uri) {
     val context = LocalContext.current

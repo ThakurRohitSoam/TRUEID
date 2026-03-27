@@ -27,7 +27,7 @@ import com.arpanapteam.trueid.ui.theme.TextGray
 @Composable
 fun TermsAndConditionsScreen(navController: NavController) {
     Scaffold(
-        containerColor = OffWhite, // ✅ Matched theme background
+        containerColor = OffWhite,
         topBar = { TermsAndConditionsTopAppBar(navController) }
     ) { paddingValues ->
         LazyColumn(
@@ -35,10 +35,9 @@ fun TermsAndConditionsScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp) // ✅ Proper spacing between cards
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // --- HEADER INTRO ---
             item {
                 Text(
                     text = "Terms and Conditions",
@@ -49,7 +48,7 @@ fun TermsAndConditionsScreen(navController: NavController) {
                 )
             }
 
-            // --- TERMS CARDS ---
+            // TERMS CARDS
             item {
                 Term(number = 1, title = "Introduction") {
                     Text(
@@ -113,7 +112,7 @@ fun TermsAndConditionsTopAppBar(navController: NavController) {
     )
 }
 
-// ✅ PREMIUM CARD DESIGN ADDED HERE
+// PREMIUM CARD DESIGN ADDED HERE
 @Composable
 fun Term(number: Int, title: String, content: @Composable () -> Unit) {
     Card(

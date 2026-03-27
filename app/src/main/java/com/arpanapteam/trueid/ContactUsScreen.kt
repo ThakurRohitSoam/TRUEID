@@ -118,7 +118,7 @@ fun ContactUsScreen(navController: NavHostController, onBack: () -> Unit = {}) {
 
             Spacer(Modifier.height(12.dp))
 
-            // ----------- SOCIAL LINKS LIST --------------
+            // SOCIAL LINKS LIST
             SocialItem(
                 icon = R.drawable.arattai,
                 title = "Arattai",
@@ -161,13 +161,13 @@ fun ContactTopCard(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {} // 🟢 Naya onClick parameter add kiya
+    onClick: () -> Unit = {} // Naya onClick parameter add kiya
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp)) // 🟢 Click ripple ko box ke andar rakhne ke liye clip
+            .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .clickable { onClick() } // 🟢 Click functionality enable ki
+            .clickable { onClick() }
             .padding(20.dp)
     ) {
 

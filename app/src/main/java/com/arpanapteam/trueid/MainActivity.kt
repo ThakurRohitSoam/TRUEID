@@ -4,17 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.outlined.Apps
-import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,32 +17,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
-
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import androidx.navigation.compose.*
-
+import androidx.navigation.navArgument
 import com.arpanapteam.trueid.Feedback.MultiStepFeedbackScreen
 import com.arpanapteam.trueid.Services.*
 import com.arpanapteam.trueid.ui.theme.*
-
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
 
         setContent {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
-
             val themeFlow = remember { ThemePreference.themeFlow(context) }
             val isDarkTheme by themeFlow.collectAsState(initial = false)
 
@@ -60,9 +51,7 @@ class MainActivity : ComponentActivity() {
                 MainAppUI(
                     isDarkTheme = isDarkTheme,
                     onToggleTheme = { themeValue ->
-                        scope.launch {
-                            ThemePreference.saveTheme(context, themeValue)
-                        }
+                        scope.launch { ThemePreference.saveTheme(context, themeValue) }
                     }
                 )
             }
@@ -70,143 +59,77 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// 🟢 STATIC SERVICE ROUTES LIST (Isse NavHost clean rahega)
+val staticServiceRoutes = listOf(
+    // Documents
+    "aadhar" to "Aadhaar Services", "pan" to "PAN Card Services",
+    "dl" to "Driving Licence", "passport" to "Indian Passport", "voter" to "Voter ID",
+    // E-District
+    "income_certificate" to "Income Certificate", "domicile" to "Domicile Certificate",
+    "caste" to "Caste Certificate", "ration" to "Ration Card", "family" to "Family ID",
+    // Schemes & Scholarships
+    "pmkisan" to "PM-Kisan Scheme", "pmkvy" to "PMKVY Training",
+    "uppension" to "UP Pension Services", "upscholarship" to "UP Scholarship",
+    "nsp" to "National Scholarship", "saksham" to "Saksham Scholarship",
+    // Boards & Education
+    "upboard" to "UP Board (UPMSP)", "cbse" to "CBSE Board", "bteup" to "BTEUP",
+    "cisce" to "ICSE Board", "aktu" to "AKTU University", "ccsu" to "CCSU University",
+    // Property & Transport
+    "bhulekh" to "UP Bhulekh", "property_registration" to "Property Registration",
+    "property_maps" to "Property Maps", "railway" to "Indian Railway",
+    "flight" to "Flight Booking", "metro" to "Metro Services", "bus" to "Bus Ticket Booking"
+)
+
 @Composable
-fun MainAppUI(
-    isDarkTheme: Boolean,
-    onToggleTheme: (Boolean) -> Unit
-) {
+fun MainAppUI(isDarkTheme: Boolean, onToggleTheme: (Boolean) -> Unit) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // 🟢 CURRENT ROUTE CHECKER
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    // 1. Drawer Sirf 'home' screen pe slide hoke khulega
     val isDrawerGestureEnabled = currentRoute == "home"
-
-    // 2. Admin routes ki list (jahan bottom bar hide karna hai)
-    val adminRoutes = listOf(
-        "admin_login", "admin_dashboard", "manage_services",
-        "manage_news", "view_feedback", "manage_service_links",
-        "manage_service_info", "manage_home_services"
-    )
-    val showBottomBar = currentRoute !in adminRoutes
-
-    val openDrawer: () -> Unit = {
-        scope.launch { drawerState.open() }
-    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = isDrawerGestureEnabled,
-        drawerContent = {
-            AppDrawer(
-                navController,
-                { scope.launch { drawerState.close() } },
-                isDarkTheme,
-                onToggleTheme
-            )
-        }
+        drawerContent = { AppDrawer(navController, { scope.launch { drawerState.close() } }, isDarkTheme, onToggleTheme) }
     ) {
         Scaffold(
-            contentWindowInsets = WindowInsets(0,0,0,0),
-            bottomBar = {
-                // ✅ ADMIN PANEL LOCK
-                if (showBottomBar) {
-                    TrueIdBottomBar(navController)
-                }
-            }
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = { TrueIdBottomBar(navController) } // Bottom bar ab hamesha dikhega
         ) { padding ->
 
-            NavHost(
-                navController = navController,
-                startDestination = "home",
-                modifier = Modifier.padding(padding)
-            ) {
-                // --- MAIN APP SCREENS ---
-                composable("home") { TrueIdHomeScreen(openDrawer = openDrawer, navController = navController) }
+            NavHost(navController = navController, startDestination = "home", modifier = Modifier.padding(padding)) {
+
+                // --- CORE APP SCREENS ---
+                composable("home") { TrueIdHomeScreen(openDrawer = { scope.launch { drawerState.open() } }, navController = navController) }
                 composable("services") { ServicesScreen(navController) }
                 composable("news") { NewsScreen(navController) }
-                composable("feedback") { MultiStepFeedbackScreen({ navController.popBackStack() }, { navController.popBackStack() }) }
-
-                // 🟢 NAYA ROUTE: MY VAULT (Ab iski apni alag file hai)
                 composable("my_vault") { MyVaultScreen(navController) }
-
                 composable("about") { AboutScreen(navController) }
                 composable("terms") { TermsAndConditionsScreen(navController) }
                 composable("contact") { ContactUsScreen(navController = navController, onBack = { navController.popBackStack() }) }
+                composable("feedback") { MultiStepFeedbackScreen({ navController.popBackStack() }, { navController.popBackStack() }) }
 
-                composable(
-                    route = "news_detail/{newsId}",
-                    arguments = listOf(navArgument("newsId") { type = NavType.IntType })
-                ) { backStackEntry ->
-                    val newsId = backStackEntry.arguments?.getInt("newsId") ?: return@composable
+                composable(route = "news_detail/{newsId}", arguments = listOf(navArgument("newsId") { type = NavType.IntType })) {
+                    val newsId = it.arguments?.getInt("newsId") ?: return@composable
                     NewsDetailScreen(newsId = newsId, onBack = { navController.popBackStack() })
                 }
 
-                // --- ADMIN ROUTES ---
-                composable("admin_login") { AdminLoginScreen(navController) }
-                composable("admin_dashboard") { AdminDashboardScreen(navController) }
-                composable("manage_services") { ManageServicesScreen(navController) }
-                composable("manage_news") { ManageNewsScreen(navController) }
-                composable("view_feedback") { ViewFeedbackScreen(navController) }
-                composable("manage_service_links") { ManageServiceLinksScreen(navController) }
-                composable("manage_service_info") { ManageServiceInfoScreen(navController) }
-                composable("manage_home_services") { ManageHomeServicesScreen(navController) }
-
                 // ==========================================
-                // 🚀 DYNAMIC SERVICES ROUTING
+                // 🚀 DYNAMIC SERVICES ROUTING (CLEANED UP)
                 // ==========================================
 
-                // Documents
-                composable("aadhar") { DynamicServiceScreen(navController, "aadhar", "Aadhaar Services") }
-                composable("pan") { DynamicServiceScreen(navController, "pan", "PAN Card Services") }
-                composable("dl") { DynamicServiceScreen(navController, "Driving Licence", "Driving Licence") }
-                composable("passport") { DynamicServiceScreen(navController, "passport", "Indian Passport") }
-                composable("voter") { DynamicServiceScreen(navController, "voter", "Voter ID") }
+                // 1. Loop chala kar saare static routes ek baar mein declare kar diye
+                staticServiceRoutes.forEach { (routeKey, title) ->
+                    composable(routeKey) { DynamicServiceScreen(navController, routeKey, title) }
+                }
 
-                // E-District
-                composable("income_certificate") { DynamicServiceScreen(navController, "income_certificate", "Income Certificate") }
-                composable("domicile") { DynamicServiceScreen(navController, "domicile", "Domicile Certificate") }
-                composable("caste") { DynamicServiceScreen(navController, "caste", "Caste Certificate") }
-                composable("ration") { DynamicServiceScreen(navController, "rationcard", "Ration Card") }
-                composable("family") { DynamicServiceScreen(navController, "family", "Family ID") }
-
-                // Schemes & Scholarship
-                composable("pmkisan") { DynamicServiceScreen(navController, "pmkisan", "PM-Kisan Scheme") }
-                composable("pmkvy") { DynamicServiceScreen(navController, "pmkvy", "PMKVY Training") }
-                composable("uppension") { DynamicServiceScreen(navController, "uppension", "UP Pension Services") }
-                composable("upscholarship") { DynamicServiceScreen(navController, "upscholarship", "UP Scholarship") }
-                composable("nsp") { DynamicServiceScreen(navController, "nsp", "National Scholarship") }
-                composable("saksham") { DynamicServiceScreen(navController, "saksham", "Saksham Scholarship") }
-
-                // Boards
-                composable("upboard") { DynamicServiceScreen(navController, "upboard", "UP Board (UPMSP)") }
-                composable("cbse") { DynamicServiceScreen(navController, "cbse", "CBSE Board") }
-                composable("bteup") { DynamicServiceScreen(navController, "bteup", "BTEUP") }
-                composable("cisce") { DynamicServiceScreen(navController, "cisce", "ICSE Board") }
-                composable("aktu") { DynamicServiceScreen(navController, "aktu", "AKTU University") }
-                composable("ccsu") { DynamicServiceScreen(navController, "ccsu", "CCSU University") }
-
-                // Property & Transport
-                composable("bhulekh") { DynamicServiceScreen(navController, "bhulekh", "UP Bhulekh") }
-                composable("property_registration") { DynamicServiceScreen(navController, "property_registration", "Property Registration") }
-                composable("property_maps") { DynamicServiceScreen(navController, "property_maps", "Property Maps") }
-                composable("railway") { DynamicServiceScreen(navController, "railway", "Indian Railway") }
-                composable("flight") { DynamicServiceScreen(navController, "flight", "Flight Booking") }
-                composable("metro") { DynamicServiceScreen(navController, "metro", "Metro Services") }
-                composable("bus") { DynamicServiceScreen(navController, "bus", "Bus Ticket Booking") }
-                composable("manage_travel_services") { ManageTravelServicesScreen(navController = navController) }
-
-                // 🚀 THE MASTER ROUTE FOR NEW DYNAMIC SERVICES
+                // 2. The Master Route for future dynamic services
                 composable(
                     route = "dynamic_service/{serviceKey}/{title}",
-                    arguments = listOf(
-                        navArgument("serviceKey") { type = NavType.StringType },
-                        navArgument("title") { type = NavType.StringType }
-                    )
+                    arguments = listOf(navArgument("serviceKey") { type = NavType.StringType }, navArgument("title") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val serviceKey = backStackEntry.arguments?.getString("serviceKey") ?: ""
                     val title = backStackEntry.arguments?.getString("title") ?: "Service"
@@ -222,10 +145,8 @@ fun TrueIdBottomBar(navController: NavController) {
     val items = listOf(
         BottomNavItem("Home", Icons.Outlined.Home, "home"),
         BottomNavItem("Services", Icons.Outlined.Apps, "services"),
-        // 🟢 NAYA BUTTON ADD KIYA HAI YAHAN
-        BottomNavItem("My Vault", Icons.Outlined.Folder, "my_vault"),
         BottomNavItem("News", Icons.AutoMirrored.Outlined.Article, "news"),
-        BottomNavItem("Feedback", Icons.Outlined.Feedback, "feedback")
+        BottomNavItem("My Vault", Icons.Outlined.Folder, "my_vault"),
     )
 
     val backStack by navController.currentBackStackEntryAsState()
@@ -237,13 +158,11 @@ fun TrueIdBottomBar(navController: NavController) {
                 selected = current?.hierarchy?.any { it.route == item.route } == true,
                 onClick = {
                     navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = false
-                        }
+                        popUpTo(navController.graph.startDestinationId) { saveState = false }
                         launchSingleTop = true
                     }
                 },
-                label = { Text(item.label, fontSize = 11.sp) }, // Thoda chota kiya taaki 5 fit ho jaye
+                label = { Text(item.label, fontSize = 11.sp) },
                 icon = { Icon(item.icon, item.label) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Indigo,

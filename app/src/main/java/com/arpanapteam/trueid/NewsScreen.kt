@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.CloudOff // 🟢 CloudOff Icon Import
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
@@ -25,37 +25,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign // 🟢 TextAlign Import
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.arpanapteam.trueid.ui.theme.Indigo // 🟢 Indigo Color Import
+import com.arpanapteam.trueid.ui.theme.Indigo
 import com.arpanapteam.trueid.ui.theme.OffWhite
 import com.arpanapteam.trueid.ui.theme.TextGray
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
-// ==========================================
-// 📰 MAIN NEWS LIST SCREEN
-// ==========================================
+
+// MAIN NEWS LIST SCREEN
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(navController: NavController) {
     var newsItems by remember { mutableStateOf<List<AdminNewsModel>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    var isOffline by remember { mutableStateOf(false) } // 🟢 OFFLINE CHECKER
-    var retryTrigger by remember { mutableIntStateOf(0) } // 🟢 RETRY BUTTON KE LIYE
+    var isOffline by remember { mutableStateOf(false) }
+    var retryTrigger by remember { mutableIntStateOf(0) }
 
-    // Screen khulte hi ya Retry dabane par data fetch karo
     LaunchedEffect(retryTrigger) {
         isLoading = true
         isOffline = false
         try {
             newsItems = supabase.postgrest["news"].select().decodeList<AdminNewsModel>()
         } catch (e: Exception) {
-            isOffline = true // 🟢 Error aane par offline set ho jayega
+            isOffline = true
             println("Error fetching news: ${e.message}")
         } finally {
             isLoading = false
@@ -71,7 +69,7 @@ fun NewsScreen(navController: NavController) {
             if (isLoading) {
                 CircularProgressIndicator(color = Indigo)
             }
-            // 🟢 AGAR NET BAND HAI TOH YEH DIKHEGA
+            //  AGAR NET BAND HAI TOH YEH DIKHEGA
             else if (isOffline) {
                 OfflineUI { retryTrigger++ }
             }
@@ -111,9 +109,7 @@ fun NewsTopAppBar(onBack: () -> Unit) {
     )
 }
 
-// ==========================================
-// 🃏 SINGLE NEWS CARD
-// ==========================================
+//SINGLE NEWS CARD
 @Composable
 fun NewsCard(
     article: AdminNewsModel,
@@ -183,9 +179,8 @@ fun NewsCard(
     }
 }
 
-// ==========================================
-// 📖 DETAIL SCREEN (Read More -> opens this)
-// ==========================================
+// DETAIL SCREEN (Read More -> opens this)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsDetailScreen(
@@ -195,8 +190,8 @@ fun NewsDetailScreen(
     var article by remember { mutableStateOf<AdminNewsModel?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
-    var isOffline by remember { mutableStateOf(false) } // 🟢 OFFLINE CHECKER
-    var retryTrigger by remember { mutableIntStateOf(0) } // 🟢 RETRY BUTTON KE LIYE
+    var isOffline by remember { mutableStateOf(false) } //  OFFLINE CHECKER
+    var retryTrigger by remember { mutableIntStateOf(0) } // RETRY BUTTON KE LIYE
 
     LaunchedEffect(newsId, retryTrigger) {
         isLoading = true
@@ -205,7 +200,7 @@ fun NewsDetailScreen(
             val result = supabase.postgrest["news"].select { filter { eq("id", newsId) } }.decodeList<AdminNewsModel>()
             article = result.firstOrNull()
         } catch (e: Exception) {
-            isOffline = true // 🟢 Error aane par offline set ho jayega
+            isOffline = true
         } finally {
             isLoading = false
         }
@@ -258,9 +253,7 @@ fun NewsDetailScreen(
     }
 }
 
-// ==========================================
-// ☁️ OFFLINE UI COMPONENT
-// ==========================================
+// OFFLINE UI COMPONENT
 @Composable
 fun OfflineUI(onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {

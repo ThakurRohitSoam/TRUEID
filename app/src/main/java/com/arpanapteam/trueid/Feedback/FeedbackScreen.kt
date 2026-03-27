@@ -27,8 +27,8 @@ import com.arpanapteam.trueid.supabase
 import com.arpanapteam.trueid.ui.theme.Indigo
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
-import java.net.UnknownHostException // 🟢 Naya Import (Internet error pakadne ke liye)
-import java.net.ConnectException    // 🟢 Naya Import
+import java.net.UnknownHostException
+import java.net.ConnectException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +96,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                 }
             }
         } else {
-            // 🟢 SINGLE PAGE FEEDBACK FORM
+
             Column(
                 modifier = Modifier
                     .padding(padding)
@@ -106,7 +106,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
             ) {
                 Spacer(Modifier.height(10.dp))
 
-                // --- RATING SECTION ---
+                // RATING SECTION
                 Text("How would you rate us?", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Pick a rate *", color = Color.Gray)
@@ -116,7 +116,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- COMMENTS SECTION ---
+                //  COMMENTS SECTION
                 Text("Tell us more", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -132,7 +132,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // --- USER DETAILS SECTION ---
+                // USER DETAILS SECTION
                 Text("Please share your details for a possible follow-up.", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
 
@@ -162,7 +162,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
 
                 Spacer(Modifier.height(32.dp))
 
-                // --- SUBMIT BUTTON ---
+                // SUBMIT BUTTON
                 Button(
                     onClick = {
                         if (rating == 0) {
@@ -184,15 +184,15 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                                     isLoading = false
                                     isSubmitted = true
                                 } catch (e: UnknownHostException) {
-                                    // 🟢 SPECIAL CATCH: Internet band hone par (URL resolve nahi hota)
+                                    //SPECIAL CATCH: Internet band hone par
                                     isLoading = false
                                     Toast.makeText(context, "You are offline. Feedback could not be sent.", Toast.LENGTH_LONG).show()
                                 } catch (e: ConnectException) {
-                                    // 🟢 SPECIAL CATCH: Connection fail hone par
+                                    // SPECIAL CATCH: Connection fail hone par
                                     isLoading = false
                                     Toast.makeText(context, "Connection failed. Please check your internet.", Toast.LENGTH_LONG).show()
                                 } catch (e: Exception) {
-                                    // 🟢 DUSRA KOI ERROR HUA TOH (Jaise database error)
+                                    // DUSRA KOI ERROR HUA TOH
                                     isLoading = false
                                     val errorMsg = e.message ?: "Unknown error"
                                     if(errorMsg.contains("Unable to resolve host") || errorMsg.contains("No address associated")) {
@@ -212,7 +212,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
                     if (isLoading) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                     } else {
-                        Text("Send", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Submit", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
 
@@ -222,7 +222,7 @@ fun MultiStepFeedbackScreen(onBack: () -> Unit, onHomeNavigate: () -> Unit) {
     }
 }
 
-// --- RATING STARS COMPONENT ---
+//RATING STARS COMPONENT
 @Composable
 fun RatingRow(rating: Int, onRatingChange: (Int) -> Unit) {
     Row(

@@ -75,7 +75,7 @@ fun AboutScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "Welcome to our Self-Service Portal. Our mission is to provide comprehensive and easy-to-understand information about services and schemes offered by the Government of India. We offer not just information, but also direct links and step-by-step instructions to help you access these services without hassle. Everything you need is right here in one place.",
-                            textAlign = TextAlign.Start, // ✅ Paragraph ab left-aligned aur clean dikhega
+                            textAlign = TextAlign.Start,
                             fontSize = 15.sp,
                             color = TextGray,
                             lineHeight = 24.sp
@@ -84,7 +84,7 @@ fun AboutScreen(navController: NavController) {
                 }
             }
 
-            // --- SERVICES WE COVER HEADING ---
+            // SERVICES WE COVER HEADING
             item {
                 Text(
                     text = "Services We Cover",
@@ -95,7 +95,7 @@ fun AboutScreen(navController: NavController) {
                 )
             }
 
-            // --- LIST OF SERVICES AS MODERN CARDS ---
+            // LIST OF SERVICES AS MODERN CARDS
             itemsIndexed(services) { index, service ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),

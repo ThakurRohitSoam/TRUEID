@@ -41,9 +41,7 @@ import com.arpanapteam.trueid.ui.theme.TextGray
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
-// ==========================================
-// 1. OFFLINE DATA
-// ==========================================
+//  OFFLINE DATA
 data class ServiceData(val title: String, val description: String, val icon: ImageVector, val route: String?, val urlKey: String? = null)
 data class ServiceCategory(val name: String, val items: List<ServiceData>)
 
@@ -93,9 +91,7 @@ val offlineCategories = listOf(
     ))
 )
 
-// ==========================================
-// 2. MAIN SCREEN LOGIC
-// ==========================================
+// MAIN SCREEN LOGIC
 @Composable
 fun ServicesScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
@@ -117,16 +113,16 @@ fun ServicesScreen(navController: NavHostController) {
         }
     }
 
-    // ✅ PRO FIX: SMART MERGING LOGIC
+    //FIX: SMART MERGING LOGIC
     val allCategoriesList = remember(onlineUpdates, travelUpdates) {
         val mergedMap = mutableMapOf<String, MutableList<ServiceData>>()
 
-        // 1. Offline categories ko map mein daalo
+        // Offline categories ko map mein dalo
         offlineCategories.forEach { category ->
             mergedMap[category.name] = category.items.toMutableList()
         }
 
-        // 2. Travel updates ko smart tarike se merge karo
+        // 2. Travel updates ko smart tarike se merge karana
         if (travelUpdates.isNotEmpty()) {
             val travelKey = mergedMap.keys.firstOrNull { it.equals("Travel & Ticket Bookings", ignoreCase = true) } ?: "Travel & Ticket Bookings"
             val travelList = mergedMap.getOrPut(travelKey) { mutableListOf() }
@@ -144,7 +140,7 @@ fun ServicesScreen(navController: NavHostController) {
             }
         }
 
-        // 3. General Online Services ko sahi category mein dalo
+        // General Online Services ko sahi category mein dalo
         onlineUpdates.forEach { adminService ->
             val rawCatName = adminService.category?.trim()
             val catName = if (rawCatName.isNullOrEmpty()) "New Services" else rawCatName
@@ -164,7 +160,7 @@ fun ServicesScreen(navController: NavHostController) {
             )
         }
 
-        // 4. Sequence maintain karte hue final list banao
+        // Sequence maintain karte hue final list
         val finalList = mutableListOf<ServiceCategory>()
         offlineCategories.forEach { offlineCat ->
             mergedMap[offlineCat.name]?.let { items ->
@@ -173,7 +169,7 @@ fun ServicesScreen(navController: NavHostController) {
             }
         }
 
-        // Bachi hui (bilkul nayi) categories last me add hongi
+        // Bachi hui categories last me add
         mergedMap.forEach { (name, items) ->
             finalList.add(ServiceCategory(name, items))
         }
@@ -181,7 +177,7 @@ fun ServicesScreen(navController: NavHostController) {
         finalList
     }
 
-    // --- VIEW ALL PAGE LOGIC ---
+    //  VIEW ALL PAGE LOGIC
     val category = selectedCategory
     if (category != null) {
         BackHandler { selectedCategory = null }
@@ -199,7 +195,7 @@ fun ServicesScreen(navController: NavHostController) {
         return
     }
 
-    // --- MAIN PAGE LOGIC ---
+    //  MAIN PAGE LOGIC
     Scaffold(
         containerColor = OffWhite,
         topBar = { TopBarUI("Services") { navController.navigateUp() } },
@@ -238,9 +234,7 @@ fun ServicesScreen(navController: NavHostController) {
     }
 }
 
-// ==========================================
-// 3. UI COMPONENTS
-// ==========================================
+// UI COMPONENTS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -277,7 +271,7 @@ fun ServiceCategorySection(title: String, onViewAllClick: () -> Unit, content: @
     }
 }
 
-// 🔵 CARD CLICK HONE PAR NAYA PAGE KHULEGA
+// CARD CLICK HONE PAR NAYA PAGE KHULEGA
 @Composable
 fun ServiceItemCard(service: ServiceData, navController: NavHostController) {
     val context = LocalContext.current

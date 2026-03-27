@@ -116,14 +116,14 @@ fun CreateServiceCardScreen(
                             try {
                                 val newCard = mapOf(
                                     "title" to title.trim(),
-                                    "subtitle" to description.trim(), // Humne db me isko subtitle rakha tha
+                                    "subtitle" to description.trim(),
                                     "category" to category.trim(),
                                     "service_key" to serviceKey.trim().lowercase() // URL safe
                                 )
                                 supabaseClient.from("app_services").insert(newCard)
                                 snackbarMessage = "Card Added Successfully!"
 
-                                // Fields clear kar do taaki naya card add kar sakein
+                                // Fields clear kar do taki naya card add kar sake
                                 title = ""
                                 description = ""
                                 category = ""
@@ -170,7 +170,6 @@ fun CreateServiceCardScreen(
                 color = Color.Black
             )
 
-            // Yahan aap future me LazyColumn lagakar existing cards dikha sakte hain
         }
     }
 }

@@ -288,17 +288,13 @@ fun MetroSection(metros: List<MetroInfo>) {
     }
 }
 
-// ==============================================================
-// 🚂 RAILWAY SECTION
-// ==============================================================
+// RAILWAY SECTION
 @Composable
 fun RailwaySection() {
-    // Railway ke links normal "links" list se hi aa jayenge
 }
 
-// ==============================================================
-// 🛠 REUSABLE UI COMPONENTS & HELPERS
-// ==============================================================
+// REUSABLE UI COMPONENTS & HELPERS
+
 
 @Composable
 fun DetailViewLayout(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
@@ -311,7 +307,7 @@ fun DetailViewLayout(title: String, onBack: () -> Unit, content: @Composable Col
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Indigo)
             }
-            HorizontalDivider(color = Color.LightGray) // 🟢 FIXED: Divider() is replaced by HorizontalDivider()
+            HorizontalDivider(color = Color.LightGray) //FIXED: Divider() is replaced by HorizontalDivider()
             content()
         }
     }

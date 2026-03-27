@@ -1,12 +1,8 @@
 package com.arpanapteam.trueid
 
-import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures // 🟢 Naya import gesture ke liye
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput // 🟢 Naya import pointer input ke liye
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +36,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.launch
 
 // ==========================================
 // 1. DATA MODELS & OFFLINE HOME DATA
@@ -136,7 +130,6 @@ fun TrueIdHomeScreen(
         topBar = {
             TrueIdTopAppBar(
                 openDrawer = openDrawer,
-                navController = navController,
                 isSearchActive = isSearchActive,
                 searchQuery = searchQuery,
                 onSearchActiveChange = { active ->
@@ -177,23 +170,16 @@ fun TrueIdHomeScreen(
     }
 }
 
-// ==========================================
-// 3. UI COMPONENTS
-// ==========================================
+// UI COMPONENTS
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrueIdTopAppBar(
     openDrawer: () -> Unit,
-    navController: NavHostController,
     isSearchActive: Boolean,
     searchQuery: String,
     onSearchActiveChange: (Boolean) -> Unit,
     onSearchQueryChange: (String) -> Unit
 ) {
-    var tapCount by remember { mutableIntStateOf(0) }
-    var lastTapTime by remember { mutableLongStateOf(0L) }
-    val context = LocalContext.current // 🟢 Context for Toast
-
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -222,34 +208,8 @@ fun TrueIdTopAppBar(
                     focusRequester.requestFocus()
                 }
             } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    // 🟢 YAHAN HAI SECRET AGENT WALA LOGIC (5 Clicks + 1 Hold)
-                    modifier = Modifier.pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                val currentTime = System.currentTimeMillis()
-                                if (currentTime - lastTapTime < 600) {
-                                    tapCount++
-                                } else {
-                                    tapCount = 1
-                                }
-                                lastTapTime = currentTime
-                            },
-                            onLongPress = {
-                                val currentTime = System.currentTimeMillis()
-                                // Check if 5 taps happened and the long press is immediate
-                                if (tapCount >= 5 && (currentTime - lastTapTime) < 1000) {
-                                    Toast.makeText(context, "Admin Access Granted", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("admin_login")
-                                    tapCount = 0
-                                } else {
-                                    tapCount = 0
-                                }
-                            }
-                        )
-                    }
-                ) {
+                // 🟢 CLEAN UI - Gestures Removed
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.VerifiedUser, null, tint = Indigo)
                     Spacer(Modifier.width(8.dp))
                     Text("TRUEID", fontWeight = FontWeight.Bold, color = Color.Black)
@@ -323,7 +283,7 @@ fun ServiceCategoryCard(
     }
 }
 
-// 🔵 CARD CLICK LOGIC FIX - AAB HAR CLICK PAR DYNAMIC SCREEN KHULEGI
+// CARD CLICK LOGIC
 @Composable
 fun ServiceItemRow(
     item: HomeServiceItem,
@@ -345,8 +305,6 @@ fun ServiceItemRow(
                     if (item.route != null) {
                         navController.navigate(item.route)
                     } else if (!item.urlKey.isNullOrEmpty()) {
-                        // 🟢 YAHAN FIX HAI: Direct link open hone wala system hata diya.
-                        // Ab seedha 'dynamic_service' wala page khulega.
                         val safeKey = Uri.encode(item.urlKey.trim())
                         val safeName = Uri.encode(item.name.trim())
                         navController.navigate("dynamic_service/$safeKey/$safeName")

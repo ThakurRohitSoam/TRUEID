@@ -58,7 +58,7 @@ fun LaunchScreen() {
 @Composable
 fun LaunchScreenPreview() {
 
-    TRUEIDTheme(content = {   // REQUIRED
+    TRUEIDTheme(content = {
         LaunchScreen()
     })
 }

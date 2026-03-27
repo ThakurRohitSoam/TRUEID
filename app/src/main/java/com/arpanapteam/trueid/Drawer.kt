@@ -33,8 +33,8 @@ import com.arpanapteam.trueid.ui.theme.Indigo
 fun AppDrawer(
     navController: NavController,
     onClose: () -> Unit,
-    isDarkTheme: Boolean,                 // <- current theme
-    onToggleTheme: (Boolean) -> Unit      // <- change theme callback
+    isDarkTheme: Boolean,                 // current theme
+    onToggleTheme: (Boolean) -> Unit      // change theme callback
 ) {
     ModalDrawerSheet(
         modifier = Modifier.width(300.dp),
@@ -46,7 +46,7 @@ fun AppDrawer(
                 .padding(16.dp)
         ) {
 
-            // ---------------- HEADER ----------------
+            // HEADER
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -81,7 +81,7 @@ fun AppDrawer(
 
             Spacer(Modifier.height(32.dp))
 
-            // ---------------- MENU ITEMS ----------------
+            //  MENU ITEMS
             DrawerMenuItem(
                 icon = Icons.Outlined.Info,
                 text = "About Us",
@@ -100,7 +100,7 @@ fun AppDrawer(
                 }
             )
 
-            // ⭐ Theme switch (REAL STATE)
+            // Theme switch (REAL STATE)
             ThemeMenuItem(
                 isDarkTheme = isDarkTheme,
                 onToggleTheme = onToggleTheme
@@ -126,7 +126,7 @@ fun AppDrawer(
 
             Spacer(Modifier.weight(1f))
 
-            // ---------------- FOOTER ----------------
+            //  FOOTER
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -153,7 +153,7 @@ fun AppDrawer(
     }
 }
 
-// ---------------- MENU ITEM ----------------
+// MENU ITEM
 @Composable
 fun DrawerMenuItem(
     icon: ImageVector,
@@ -179,7 +179,7 @@ fun DrawerMenuItem(
     }
 }
 
-// ---------------- THEME TOGGLE ----------------
+// THEME TOGGLE
 @Composable
 fun ThemeMenuItem(
     isDarkTheme: Boolean,
